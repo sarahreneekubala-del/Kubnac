@@ -148,6 +148,10 @@ th{background:#ede7f6}
 .setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .setgrid button{min-height:110px;font-size:28px;margin:0}
 .help h2{color:#5e35b1;margin-top:26px}
+.badge.ok{background:#43a047} .badge.tts{background:#90a4ae}
+.recrow .lname{font-size:22px}
+.recrow .snd{font-size:30px}
+h3{font-size:22px;margin:18px 0 4px;color:#5e35b1}
 .help li{margin:8px 0;line-height:1.45}
 
 /* modal + toast */
@@ -334,7 +338,176 @@ function speak(text, opt){
   });
 }
 var lastCancel = 0;
-function stopSpeak(){ try { if (hasTTS){ speechSynthesis.cancel(); lastCancel = Date.now(); } } catch(e){} }
+function stopSpeak(){
+  try { if (hasTTS){ speechSynthesis.cancel(); lastCancel = Date.now(); } } catch(e){}
+  audioGen++;
+  if (curAudio){ try { curAudio.pause(); } catch(e){} curAudio = null; }
+}
+
+/* =========================================================
+   MOMMA'S VOICE RECORDINGS (saved in this browser)
+   Keys:  snd:sh   = the sound "sh"
+          word:wish = the word broken into sounds, then blended
+   ========================================================= */
+var REC = {};          // which recordings exist
+var URLC = {};         // ready-to-play links
+var curAudio = null, audioGen = 0, RA = null, RLABEL = {};
+var idbConn = null;
+function idb(){
+  return new Promise(function(res, rej){
+    if (idbConn) return res(idbConn);
+    if (!window.indexedDB) return rej(new Error('no-idb'));
+    var r = indexedDB.open('mommaPracticeAudio', 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore('rec'); };
+    r.onsuccess = function(){ idbConn = r.result; res(idbConn); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function idbDo(mode, fn){
+  return idb().then(function(d){ return new Promise(function(res, rej){
+    var t = d.transaction('rec', mode), st = t.objectStore('rec'), out = { v:null };
+    fn(st, out);
+    t.oncomplete = function(){ res(out.v); }; t.onerror = function(){ rej(t.error); }; t.onabort = function(){ rej(t.error); };
+  }); });
+}
+function recPut(key, blob){
+  return idbDo('readwrite', function(st){ st.put(blob, key); }).then(function(){
+    if (URLC[key]){ URL.revokeObjectURL(URLC[key]); delete URLC[key]; }
+    REC[key] = 1;
+  });
+}
+function recGet(key){ return idbDo('readonly', function(st, out){ var r = st.get(key); r.onsuccess = function(){ out.v = r.result || null; }; }); }
+function recDel(key){
+  return idbDo('readwrite', function(st){ st.delete(key); }).then(function(){
+    if (URLC[key]){ URL.revokeObjectURL(URLC[key]); delete URLC[key]; }
+    delete REC[key];
+  });
+}
+function recAll(){
+  return idbDo('readonly', function(st, out){
+    out.v = [];
+    var r = st.openCursor();
+    r.onsuccess = function(){ var c = r.result; if (c){ out.v.push({ key:String(c.key), blob:c.value }); c.continue(); } };
+  });
+}
+function recLoadKeys(){
+  return idbDo('readonly', function(st, out){ var r = st.getAllKeys(); r.onsuccess = function(){ out.v = r.result || []; }; })
+    .then(function(ks){ REC = {}; ks.forEach(function(k){ REC[String(k)] = 1; }); })
+    .catch(function(){});
+}
+recLoadKeys();
+function sndKey(g){ return 'snd:' + String(g || '').toLowerCase().trim(); }
+function wordKey(w){ return 'word:' + plain(String(w || '')).toLowerCase().trim(); }
+function ek(k){ return encodeURIComponent(k).replace(/'/g, '%27'); }
+
+function getURL(key){
+  if (URLC[key]) return Promise.resolve(URLC[key]);
+  return recGet(key).then(function(b){ if (!b) return null; URLC[key] = URL.createObjectURL(b); return URLC[key]; }).catch(function(){ return null; });
+}
+/* Plays a recording. Resolves true if it played (or was stopped), false if there is no recording. */
+function playRec(key, rate){
+  if (!REC[key]) return Promise.resolve(false);
+  var gen = audioGen;
+  return getURL(key).then(function(url){
+    if (!url) return false;
+    if (gen !== audioGen) return true;
+    return new Promise(function(res){
+      var a = new Audio(url), done = false;
+      curAudio = a;
+      try { a.playbackRate = rate || 1; } catch(e){}
+      function fin(){ if (done) return; done = true; clearTimeout(t); if (curAudio === a) curAudio = null; res(true); }
+      a.onended = fin; a.onerror = fin; a.onpause = fin;
+      var t = setTimeout(fin, 20000);
+      var p = a.play(); if (p && p.catch) p.catch(fin);
+    });
+  });
+}
+/* Momma's recording if there is one, otherwise the computer voice. */
+function sayOrPlay(key, text, opt){
+  opt = opt || {};
+  return playRec(key, opt.prate).then(function(ok){ return ok ? true : speak(text, opt); });
+}
+
+/* Clean up a recording: cut the quiet parts at the start and end, even out the volume. */
+function processRec(blob){
+  var C = window.AudioContext || window.webkitAudioContext;
+  if (!C || !blob.arrayBuffer) return Promise.resolve(blob);
+  return blob.arrayBuffer().then(function(buf){
+    var ctx = new C();
+    return new Promise(function(res, rej){ ctx.decodeAudioData(buf, res, rej); }).then(function(ab){
+      try { ctx.close(); } catch(e){}
+      var len = ab.length, ch = ab.numberOfChannels, rate = ab.sampleRate, mono = new Float32Array(len), i, c;
+      for (c=0;c<ch;c++){ var d = ab.getChannelData(c); for (i=0;i<len;i++) mono[i] += d[i] / ch; }
+      var peak = 0; for (i=0;i<len;i++){ var v = Math.abs(mono[i]); if (v > peak) peak = v; }
+      if (peak < 0.005) return blob;   // nearly silent — keep as is
+      var thr = Math.max(0.02, peak * 0.08), s0 = 0, s1 = len - 1;
+      while (s0 < len && Math.abs(mono[s0]) < thr) s0++;
+      while (s1 > s0 && Math.abs(mono[s1]) < thr) s1--;
+      s0 = Math.max(0, s0 - Math.floor(rate * 0.06));
+      s1 = Math.min(len, s1 + Math.floor(rate * 0.15));
+      var part = mono.subarray(s0, s1), gain = Math.min(4, 0.9 / peak);
+      // shrink the file: make it about 24,000 samples a second
+      var step = Math.max(1, Math.floor(rate / 22050)), outRate = rate / step, n = Math.floor(part.length / step), out = new Float32Array(n);
+      for (i=0;i<n;i++){ var sum = 0; for (var j=0;j<step;j++) sum += part[i*step + j]; out[i] = Math.max(-1, Math.min(1, sum / step * gain)); }
+      // short fade in/out so it doesn't click
+      var f = Math.min(Math.floor(outRate * 0.01), Math.floor(n / 2));
+      for (i=0;i<f;i++){ out[i] *= i / f; out[n-1-i] *= i / f; }
+      return wavBlob(out, Math.round(outRate));
+    });
+  }).catch(function(){ return blob; });
+}
+function wavBlob(samples, rate){
+  var buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf), o = 0;
+  function str(s){ for (var i=0;i<s.length;i++) v.setUint8(o++, s.charCodeAt(i)); }
+  function u32(x){ v.setUint32(o, x, true); o += 4; }
+  function u16(x){ v.setUint16(o, x, true); o += 2; }
+  str('RIFF'); u32(36 + samples.length * 2); str('WAVE'); str('fmt '); u32(16); u16(1); u16(1); u32(rate); u32(rate * 2); u16(2); u16(16);
+  str('data'); u32(samples.length * 2);
+  for (var i=0;i<samples.length;i++){ var x = Math.max(-1, Math.min(1, samples[i])); v.setInt16(o, x < 0 ? x * 0x8000 : x * 0x7fff, true); o += 2; }
+  return new Blob([buf], { type:'audio/wav' });
+}
+
+function startRec(key){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+    alertBox('Oops', 'This browser can\'t record. Please use Chrome or Edge.'); return;
+  }
+  stopSpeak();
+  navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } }).then(function(stream){
+    var chunks = [], mr;
+    try { mr = new MediaRecorder(stream); } catch(e){ stream.getTracks().forEach(function(t){ t.stop(); }); alertBox('Oops', 'Recording could not start.'); return; }
+    RA = { key:key, mr:mr, stream:stream, timer:null };
+    mr.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+    mr.onstop = function(){
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      if (RA){ clearTimeout(RA.timer); } RA = null;
+      var blob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
+      if (!blob.size){ updateRecRow(key); toast('Nothing was recorded. Try again!'); return; }
+      processRec(blob).then(function(b){ return recPut(key, b); }).then(function(){
+        updateRecRow(key); toast('Saved! 🎙️ Here it is…'); playRec(key);
+      }).catch(function(){ updateRecRow(key); alertBox('Oops', 'That recording could not be saved on this browser.'); });
+    };
+    mr.start();
+    RA.timer = setTimeout(stopRec, 15000);   // stops by itself after 15 seconds
+    updateRecRow(key);
+  }).catch(function(){
+    alertBox('Microphone needed 🎤', 'The browser needs permission to use the microphone. Click the little <b>lock</b> or <b>mic</b> icon next to the web address, choose <b>Allow</b>, then try again.');
+  });
+}
+function stopRec(){ if (RA && RA.mr && RA.mr.state !== 'inactive'){ try { RA.mr.stop(); } catch(e){} } }
+
+function recRowHtml(key, label){
+  RLABEL[key] = label;
+  var has = !!REC[key], on = RA && RA.key === key, k = ek(key);
+  return '<div class="lrow recrow" id="rr-' + k + '"><div class="lname">' + label + ' ' +
+    (has ? '<span class="badge ok">✔ My voice</span>' : '<span class="badge tts">Computer voice</span>') + '</div>' +
+    '<button class="small ' + (on ? 'btn-red mic listening' : 'btn-red') + '" onclick="A.rec(\'' + k + '\')">' + (on ? '⏹ Stop' : '⏺ ' + (has ? 'Redo' : 'Record')) + '</button>' +
+    (has ? '<button class="small btn-blue" onclick="A.playRec(\'' + k + '\')">▶ Play</button><button class="small btn-gray" onclick="A.delRec(\'' + k + '\')" aria-label="Delete recording">🗑️</button>' : '') +
+    '</div>';
+}
+function updateRecRow(key){
+  var el = document.getElementById('rr-' + ek(key));
+  if (el && RLABEL[key] != null) el.outerHTML = recRowHtml(key, RLABEL[key]);
+}
 if (hasTTS){ try { speechSynthesis.onvoiceschanged = function(){ if (screen === 'appset') fillVoices(); }; voices(); } catch(e){} }
 
 var actx = null;
@@ -449,6 +622,7 @@ function segment(word, target, targetSay){
    ========================================================= */
 var screen = 'home', unlocked = false, curKidId = null, helpBack = 'home';
 function show(html){
+  if (RA) stopRec();
   Array.prototype.forEach.call(document.querySelectorAll('.confetti,.overlay'), function(e){ e.remove(); });
   app().innerHTML = html; window.scrollTo(0,0);
 }
@@ -608,9 +782,8 @@ function renderLesson(){
       '<button class="btn-green big" onclick="A.next()">Let\'s Go ➜</button></div>';
   } else if (c.kind === 'sound'){
     h += '<div class="card newsound"><span class="tag">✨ New Sound!</span><div class="word sound">' + esc(c.sound) + '</div><div id="zone">' +
-      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear the sound</button></div>' +
-      '<p class="hint">' + esc(k ? k.name : '') + ', say the sound! <br>Grown-up: did they say it right?</p>' +
-      '<div class="ctrlrow"><button class="btn-green huge" onclick="A.right()" aria-label="Correct">✔</button><button class="btn-red huge" onclick="A.wrong()" aria-label="Not yet">✘</button></div></div></div>';
+      '<p class="hint">👂 Listen, then say it with me' + (k ? ', ' + esc(k.name) : '') + '!</p>' +
+      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear it again</button><button class="btn-green big" onclick="A.next()">Next ➜</button></div></div></div>';
   } else if (c.kind === 'pword'){
     h += '<div class="card ' + (c.review ? 'review' : '') + '">' + tag + '<div class="word" id="wordel">' + highlightWord(c.word, c.sound) + '</div><div id="zone">' + controlsHtml(c) + '</div></div>';
   } else if (c.kind === 'heart'){
@@ -625,6 +798,10 @@ function renderLesson(){
       '<div class="overrow"><button class="btn-gray small" onclick="A.override()">👍 Parent Override: mark correct</button></div></div></div>';
   }
   show(h);
+  if (c.kind === 'sound'){
+    var stk = newSpeech();
+    (async function(){ await wait(400); if (!alive(stk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); await wait(900); if (!alive(stk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); })();
+  }
   if (c.kind === 'spell'){
     var inp = $('spellin'); inp.focus();
     inp.onkeydown = function(e){ if (e.key === 'Enter') A.check(); };
@@ -673,7 +850,7 @@ function markWrong(heard){
     zone.innerHTML = '<p class="hint">Listen carefully, then say it with me! 👂</p>' +
       '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear it again</button><button class="btn-green big" onclick="A.next()">Next ➜</button></div>';
     var tk = newSpeech();
-    (async function(){ await wait(500); if (!alive(tk)) return; await speak(c.say, {rate:0.8}); await wait(700); if (!alive(tk)) return; await speak(c.say, {rate:0.8}); })();
+    (async function(){ await wait(500); if (!alive(tk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); await wait(700); if (!alive(tk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); })();
   } else if (c.kind === 'pword'){
     c.segs = c.segs || segment(c.word, c.sound, c.tsay);
     zone.innerHTML = heardNote + '<p class="hint">Let\'s sound it out together! 🐢</p><div class="segs">' + c.segs.map(function(s,i){
@@ -703,20 +880,35 @@ function markWrong(heard){
   }
 }
 
+function segKey(s){
+  if (s.silent || s.yv) return null;
+  return sndKey(s.long ? s.g + '_e' : (s.g || s.t));
+}
 function teachPhonics(c){
   var tok = newSpeech();
   function hi(i){ c.segs.forEach(function(_,j){ var e = $('seg'+j); if (e) e.classList.toggle('on', i === 'all' || i === j); }); }
   (async function(){
     await wait(500);
+    // 1) Momma recorded this whole word? Play it.
+    var wk = wordKey(c.word);
+    if (REC[wk]){
+      if (!alive(tok)) return; hi('all');
+      await playRec(wk);
+      return;
+    }
+    // 2) Otherwise, sound by sound (Momma's sound recordings first, computer voice if missing)
+    var allMine = c.segs.every(function(s){ var k = segKey(s); return !s.say || (k && REC[k]); });
     for (var i=0;i<c.segs.length;i++){
       if (!alive(tok)) return; hi(i);
-      if (c.segs[i].say) await speak(c.segs[i].say, {rate:0.6}); else await wait(600);
+      var k = segKey(c.segs[i]);
+      if (c.segs[i].say) await sayOrPlay(k, c.segs[i].say, {rate:0.6}); else await wait(600);
       await wait(350);
     }
-    if (!alive(tok)) return; hi(-1); await speak('Now blend it.');
+    if (!alive(tok)) return; hi(-1);
+    if (allMine) await wait(500); else await speak('Now blend it.');
     for (var j=0;j<c.segs.length;j++){
       if (!alive(tok)) return; hi(j);
-      if (c.segs[j].say) await speak(c.segs[j].say, {rate:1.1}); else await wait(200);
+      if (c.segs[j].say) await sayOrPlay(segKey(c.segs[j]), c.segs[j].say, {rate:1.1, prate:1.2}); else await wait(200);
     }
     if (!alive(tok)) return; hi('all'); await speak(plain(c.word), {rate:0.7});
     if (!alive(tok)) return; await wait(300); await speak(plain(c.word));
@@ -780,7 +972,7 @@ function sameSpelling(a,b){ return String(a).trim().replace(/\s+/g,' ').toLowerC
 
 function finishLesson(){
   var k = getKid(L.kidId);
-  var scored = L.all.filter(function(c){ return c.kind !== 'banner'; });
+  var scored = L.all.filter(function(c){ return c.kind !== 'banner' && c.kind !== 'sound'; });
   var firstTry = scored.filter(function(c){ return c.correct && c.tries === 0; }).length;
   var missed = scored.filter(function(c){ return c.tries > 0; }).map(function(c){ return c.label; });
   var entry = { date:new Date().toISOString(), mode:L.mode, total:scored.length, firstTry:firstTry, stars:L.stars, missed:missed };
@@ -880,6 +1072,7 @@ function renderSettings(){
     }).join('') +
     '<p><button class="btn-green" onclick="A.addKid()">➕ Add a Kid</button></p></div>';
   h += '<div class="setgrid"><button class="btn-purple" onclick="A.appSettings()">🎛️ Voice, Mic &amp; PIN</button>' +
+    '<button class="btn-pink" onclick="A.recs()">🎙️ My Voice Recordings</button>' +
     '<button class="btn-orange" onclick="A.backup()">💾 Backup &amp; Move</button>' +
     '<button class="btn-teal" onclick="A.help()">❓ How to Use</button></div>';
   show(h);
@@ -980,6 +1173,14 @@ function renderEditList(){
     '<div class="row"><button class="btn-green" onclick="A.saveWords()">💾 Save Words</button><span class="muted" style="font-size:18px">' + words.length + ' words saved</span></div>';
   if (mode === 'phonics') h += '<p class="muted" style="font-size:18px">💡 Tip: to choose exactly how a word is broken into sound boxes, type it with dashes, like <b>d-u-ck</b> or <b>sh-ee-p</b>.</p>';
   h += '</div>';
+  if (mode === 'phonics'){
+    h += '<div class="panel"><h2>🎙️ Record Your Voice</h2><p class="muted" style="font-size:19px">Your voice plays instead of the computer voice. Tap <b>⏺ Record</b>, talk, then tap <b>⏹ Stop</b>. It plays back so you can check it. Don\'t like it? Tap <b>Redo</b>.</p>';
+    if (l.sound) h += '<h3>The sound by itself</h3><p class="muted" style="font-size:18px">Say just the sound, like <b>"shhh"</b> — no "uh" at the end.</p>' + recRowHtml(sndKey(l.sound), 'The sound <span class="snd">' + esc(l.sound) + '</span>');
+    h += '<h3>Each word — sounded out, then blended</h3><p class="muted" style="font-size:18px">Example for <b>wish</b>: say <b>"w… i… sh… wish!"</b> This plays when your child misses the word. (Save the words above first.)</p>';
+    h += words.length ? words.map(function(w){ return recRowHtml(wordKey(w), '<span class="snd">' + esc(plain(w)) + '</span>'); }).join('') : '<p><i>Add words above first.</i></p>';
+    h += '<p class="muted" style="font-size:18px">No word recording? The app sounds it out with your <b>letter sound</b> recordings instead.</p>' +
+      '<button class="btn-teal" onclick="A.recs()">🔤 Record All Letter Sounds</button></div>';
+  }
   if (mode === 'heart'){
     h += '<div class="panel"><h2>❤️ Mark the Tricky Letters</h2><p class="muted">Tap the letters that are the "tricky part." A heart will show above them on the card. Tap again to remove.</p>' +
       (l.words.length ? l.words.map(function(w, wi){
@@ -1068,6 +1269,41 @@ function fillVoices(){
   }).join('');
 }
 
+var SOUND_EX = { a:'short a, like apple', e:'short e, like egg', i:'short i, like itch', o:'short o, like octopus', u:'short u, like up',
+  a_e:'long a, like cake', e_e:'long e, like these', i_e:'long i, like bike', o_e:'long o, like home', u_e:'long u, like cute',
+  c:'like cat', g:'like goat', s:'like sun', x:'like box', y:'like yes', igh:'like night', ea:'like eat', ow:'like cow', oo:'like moon', ew:'like new' };
+function renderRecs(){
+  if (needUnlock()) return;
+  stopAll(); screen = 'recs';
+  var extra = {};
+  S.kids.forEach(function(k){ k.phonics.forEach(function(p){ var g = String(p.sound||'').toLowerCase().trim(); if (g && !DEFAULT_SAY[g]) extra[g] = 1; }); });
+  var all = Object.keys(DEFAULT_SAY).concat(Object.keys(extra));
+  var letters = all.filter(function(g){ return g.length === 1; }).sort();
+  var silentE = all.filter(function(g){ return g.indexOf('_') >= 0; });
+  var teams = all.filter(function(g){ return g.length > 1 && g.indexOf('_') < 0; });
+  function row(g){ return recRowHtml(sndKey(g), '<span class="snd">' + esc(g) + '</span>' + (SOUND_EX[g] ? ' <span class="muted" style="font-size:17px">(' + esc(SOUND_EX[g]) + ')</span>' : '')); }
+  var words = Object.keys(REC).filter(function(k){ return k.indexOf('word:') === 0; }).sort();
+  var count = Object.keys(REC).length;
+  show('<div class="topbar"><button class="btn-gray small" onclick="A.settings()">⬅ Back to Settings</button></div><h1>🎙️ My Voice Recordings</h1>' +
+    '<div class="panel"><h2>How it works</h2><ul>' +
+    '<li>Tap <b>⏺ Record</b>, say the sound, tap <b>⏹ Stop</b>. It plays back so you can check it.</li>' +
+    '<li>Say <b>just the sound</b> — "mmm," not "muh." For stop sounds like <b>b</b> or <b>t</b>, keep it short and crisp.</li>' +
+    '<li>The app cuts off the quiet parts for you, so don\'t worry about timing.</li>' +
+    '<li>Anything you don\'t record still uses the computer voice.</li>' +
+    '<li>To record a <b>whole word</b> (sounded out + blended), go to a kid → Edit → a phonics sound.</li></ul>' +
+    '<p><b>' + count + '</b> recording' + (count === 1 ? '' : 's') + ' saved on this device.</p></div>' +
+    '<div class="panel"><h2>📦 Send Recordings to Another Computer</h2>' +
+    '<p>Recordings stay on <b>this</b> device. To put them on a Chromebook: tap <b>Save Recordings File</b> here, copy the file over (Google Drive, email, or USB), then on the Chromebook go to Parent Settings → My Voice Recordings → <b>Load Recordings File</b>.</p>' +
+    '<button class="btn-green" onclick="A.exportRecs()">💾 Save Recordings File</button>' +
+    '<input type="file" id="recfile" accept=".json,application/json" style="display:none" onchange="A.importRecs(this)">' +
+    '<button class="btn-orange" onclick="document.getElementById(\'recfile\').click()">📂 Load Recordings File</button></div>' +
+    '<div class="panel"><h2>🔤 Letter Sounds</h2>' + letters.map(row).join('') + '</div>' +
+    '<div class="panel"><h2>👯 Letter Teams</h2>' + teams.map(row).join('') + '</div>' +
+    '<div class="panel"><h2>🪄 Silent-E Vowels</h2><p class="muted" style="font-size:18px">Say the long vowel sound, like "ay" for cake.</p>' + silentE.map(row).join('') + '</div>' +
+    '<div class="panel"><h2>📖 Recorded Words</h2>' +
+    (words.length ? words.map(function(k){ return recRowHtml(k, '<span class="snd">' + esc(k.slice(5)) + '</span>'); }).join('') : '<p><i>No words recorded yet.</i></p>') + '</div>');
+}
+
 function renderBackup(){
   if (needUnlock()) return;
   screen = 'backup';
@@ -1075,12 +1311,19 @@ function renderBackup(){
     '<div class="panel"><h2>What is a backup?</h2><p>A backup is <b>one small file</b> that holds <b>everything</b>: all kids, all word lists, settings, stars, and history.</p>' +
     '<ul><li>Make a backup once a week, just to be safe. 👍</li>' +
     '<li><b>To move to another computer:</b> 1) Tap <b>Save Backup</b> here. 2) Copy the backup file (it\'s in your <b>Downloads</b> folder) and this app file to the other computer — a USB stick or email works. 3) Open the app there, go to Parent Settings → Backup &amp; Move, and tap <b>Load Backup</b>.</li>' +
-    '<li>Everything is also saved automatically in this browser — the backup is just extra safety.</li></ul></div>' +
+    '<li>Everything is also saved automatically in this browser — the backup is just extra safety.</li>' +
+    '<li>🎙️ Your <b>voice recordings</b> are saved separately. Use <b>My Voice Recordings → Save Recordings File</b> for those.</li></ul></div>' +
     '<div class="panel"><h2>1️⃣ Save a Backup</h2><p>This downloads a file named like <b>practice-backup-2026-10-04.json</b> to your Downloads folder.</p>' +
     '<button class="btn-green big" onclick="A.saveBackup()">💾 Save Backup</button></div>' +
     '<div class="panel"><h2>2️⃣ Load a Backup</h2><p>⚠️ This <b>replaces</b> everything in the app on this computer with what\'s in the backup file.</p>' +
     '<input type="file" id="loadfile" accept=".json,application/json" style="display:none" onchange="A.loadBackup(this)">' +
-    '<button class="btn-orange big" onclick="document.getElementById(\'loadfile\').click()">📂 Load Backup</button></div>');
+    '<button class="btn-orange big" onclick="document.getElementById(\'loadfile\').click()">📂 Load Backup</button></div>' +
+    '<div class="panel"><h2>3️⃣ Load Lists Only</h2><p>Use this to send <b>new word lists</b> to a kid\'s computer.</p>' +
+    '<ul><li>✅ Copies: sounds, heart words, spelling lists, practice modes, and words-per-lesson.</li>' +
+    '<li>🛡️ Keeps: stars, history, PIN, voice, and sound fixes on <b>this</b> computer.</li></ul>' +
+    '<p class="muted" style="font-size:18px">How: make your list changes on your computer → Save Backup there → open that backup file here with this button.</p>' +
+    '<input type="file" id="listsfile" accept=".json,application/json" style="display:none" onchange="A.loadLists(this)">' +
+    '<button class="btn-teal big" onclick="document.getElementById(\'listsfile\').click()">📋 Load Lists Only</button></div>');
 }
 
 function renderHelp(){
@@ -1092,10 +1335,14 @@ function renderHelp(){
     '<li>Tip: Drag the file to your desktop so it\'s easy to find. Keep using the <b>same computer and same browser</b> so everything is still there.</li></ul>' +
     '<h2>👧👦 For kids</h2><ul><li>Tap your name, then pick <b>Phonics</b>, <b>Heart Words</b>, or <b>Spelling</b>.</li>' +
     '<li>Earn a ⭐ for every word you get right!</li><li>At the end, you see your stars and the words to practice.</li></ul>' +
-    '<h2>🔤 Phonics</h2><ul><li>First comes the <b>New Sound</b> card. Tap 🔊 to hear it. Your child says the sound, and you tap ✔ or ✘.</li>' +
+    '<h2>🔤 Phonics</h2><ul><li>First comes the <b>New Sound</b> card. The app says the sound by itself. Your child repeats it, then taps <b>Next</b>. (Tap 🔊 to hear it again.)</li>' +
     '<li>Next come word cards. The sound is colored. Your child reads the word, taps 🎤, and says it.</li>' +
     '<li>If it\'s wrong, the app breaks the word into colored sound boxes, says each sound, blends them, and says the word. That word comes back at the end to try again.</li>' +
     '<li>Last is the <b>Quick Review</b> (purple cards) with words from Review sounds.</li></ul>' +
+    '<h2>🎙️ Your Voice</h2><ul><li>Go to Parent Settings → <b>My Voice Recordings</b> to record each letter sound in your own voice.</li>' +
+    '<li>To record a whole word sounded out and blended (like "w… i… sh… wish"), go to a kid → <b>Edit</b> → a phonics sound → <b>Record Your Voice</b>.</li>' +
+    '<li>When a word is missed, the app plays your word recording. If there isn\'t one, it sounds it out with your letter recordings. Anything not recorded uses the computer voice.</li>' +
+    '<li>Recordings live on the device you made them on. Use <b>Save Recordings File</b> and <b>Load Recordings File</b> to copy them to a Chromebook.</li></ul>' +
     '<h2>❤️ Heart Words</h2><ul><li>These are words that can\'t be fully sounded out. The little ♥ shows the tricky part.</li>' +
     '<li>If it\'s wrong, the app spells it letter by letter and points out the heart part.</li></ul>' +
     '<h2>✏️ Spelling</h2><ul><li>The app says the word, a sentence, then the word again. Tap <b>Hear it again</b> anytime.</li>' +
@@ -1113,7 +1360,8 @@ function renderHelp(){
     '<li><b>History</b> shows dates, scores, and the most-missed words.</li>' +
     '<li><b>Voice, Mic &amp; PIN:</b> pick a voice, change the speed, turn the mic on/off, change your PIN, and fix how sounds are said.</li></ul>' +
     '<h2>💾 Backups</h2><ul><li>Everything saves by itself. But clearing your browser history can erase it, so tap <b>Save Backup</b> once a week.</li>' +
-    '<li>To move everything to another computer, use <b>Save Backup</b> here and <b>Load Backup</b> there.</li></ul>' +
+    '<li>To move everything to another computer, use <b>Save Backup</b> here and <b>Load Backup</b> there.</li>' +
+    '<li>To send <b>just new lists</b> to a kid\'s computer (and keep their stars), use <b>Save Backup</b> here and <b>Load Lists Only</b> there.</li></ul>' +
     '<p style="font-size:26px;text-align:center">You\'ve got this, ' + mom + '! 💖</p></div>');
 }
 
@@ -1125,7 +1373,7 @@ var A = window.A = {
   kid: function(id){ renderKid(id); },
   start: function(mode){ startLesson(mode); },
   help: function(){ renderHelp(); },
-  next: function(){ if (L && L.card && (L.card.kind === 'banner' || L.card.state === 'wrong')) nextCard(); },
+  next: function(){ if (L && L.card && (L.card.kind === 'banner' || L.card.kind === 'sound' || L.card.state === 'wrong')) nextCard(); },
   quit: function(){
     confirmBox('Stop this lesson?', 'Stars from this lesson won\'t be saved.', 'Yes, stop', 'btn-red').then(function(ok){ if (ok) renderKid(L ? L.kidId : curKidId); });
   },
@@ -1133,7 +1381,7 @@ var A = window.A = {
     var c = L && L.card; if (!c) return;
     if (c.kind === 'spell'){ spellPrompt(c); return; }
     newSpeech();
-    if (c.kind === 'sound') speak(c.say, {rate:0.8});
+    if (c.kind === 'sound') sayOrPlay(sndKey(c.sound), c.say, {rate:0.8});
     else speak(plain(c.word), {rate:0.85});
   },
   teach: function(){ var c = L && L.card; if (!c || c.state !== 'wrong') return; if (c.kind === 'pword') teachPhonics(c); else if (c.kind === 'heart') teachHeart(c); },
@@ -1193,6 +1441,57 @@ var A = window.A = {
   },
   changePin: function(){ if (needUnlock()) return; renderPin('create1', 'Pick 4 new numbers for your PIN.'); },
   setKid: function(id){ renderSetKid(id); },
+  recs: function(){ if (screen === 'editlist') syncWords(); renderRecs(); },
+  rec: function(k){
+    var key = decodeURIComponent(k);
+    if (RA){ stopRec(); return; }   // tapping any button while recording just stops it
+    startRec(key);
+  },
+  playRec: function(k){ stopSpeak(); playRec(decodeURIComponent(k)); },
+  delRec: function(k){
+    var key = decodeURIComponent(k);
+    confirmBox('Delete this recording?', 'The computer voice will be used instead.', 'Yes, delete', 'btn-red').then(function(ok){
+      if (!ok) return;
+      recDel(key).then(function(){ toast('Deleted.'); if (screen === 'recs' && key.indexOf('word:') === 0) renderRecs(); else updateRecRow(key); })
+        .catch(function(){ toast('Could not delete.'); });
+    });
+  },
+  exportRecs: function(){
+    recAll().then(function(items){
+      if (!items.length){ alertBox('Nothing to save yet', 'Record some sounds first!'); return; }
+      return Promise.all(items.map(function(it){
+        return new Promise(function(res){ var fr = new FileReader(); fr.onload = function(){ res({ key:it.key, data:fr.result }); }; fr.onerror = function(){ res(null); }; fr.readAsDataURL(it.blob); });
+      })).then(function(list){
+        list = list.filter(Boolean);
+        var d = new Date(), ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        var blob = new Blob([JSON.stringify({ app:'momma-practice-app', type:'recordings', version:1, savedAt:d.toISOString(), items:list })], { type:'application/json' });
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'practice-voice-recordings-' + ds + '.json';
+        document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+        alertBox('Recordings saved! 🎙️', list.length + ' recordings are in your <b>Downloads</b> folder in <b>' + esc(a.download) + '</b>.');
+      });
+    }).catch(function(){ alertBox('Oops', 'The recordings could not be saved.'); });
+  },
+  importRecs: function(input){
+    var f = input.files && input.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      input.value = '';
+      var obj = null; try { obj = JSON.parse(r.result); } catch(e){}
+      var items = obj && obj.type === 'recordings' && Array.isArray(obj.items) ? obj.items.filter(function(it){
+        return it && typeof it.key === 'string' && /^(snd|word):/.test(it.key) && typeof it.data === 'string' && /^data:audio\//.test(it.data);
+      }) : [];
+      if (!items.length){ alertBox('Hmm, that didn\'t work', 'That isn\'t a recordings file. Pick a file named like <b>practice-voice-recordings-….json</b>.'); return; }
+      confirmBox('Load ' + items.length + ' recordings?', 'Recordings with the same sound or word will be replaced. Others stay.', 'Yes, load', 'btn-orange').then(function(ok){
+        if (!ok) return;
+        var n = 0;
+        items.reduce(function(p, it){
+          return p.then(function(){ return fetch(it.data).then(function(x){ return x.blob(); }).then(function(b){ return recPut(it.key, b); }).then(function(){ n++; }).catch(function(){}); });
+        }, Promise.resolve()).then(function(){ alertBox('Recordings loaded! 🎉', n + ' recordings are ready on this device.'); renderRecs(); });
+      });
+    };
+    r.onerror = function(){ alertBox('Oops', 'That file could not be read.'); };
+    r.readAsText(f);
+  },
   history: function(id){ renderHistory(id); },
   appSettings: function(){ renderAppSettings(); },
   backup: function(){ renderBackup(); },
@@ -1257,7 +1556,7 @@ var A = window.A = {
     var l = edList(); if (!l || !l.words[wi]) return; var w = l.words[wi];
     stopSpeak(); speak(w.w).then(function(){ return w.s ? speak(w.s) : null; }).then(function(){ return speak(w.w); });
   },
-  testSay: function(){ var l = edList(); if (!l) return; stopSpeak(); speak(l.say || sayFor(l.sound), {rate:0.8}); },
+  testSay: function(){ var l = edList(); if (!l) return; var box = $('lsay'); var v = box ? box.value.trim() : l.say; stopSpeak(); speak(v || sayFor(l.sound), {rate:0.8}); },
   doneList: function(){
     syncWords();
     var k = getKid(ED.kidId), l = edList();
@@ -1287,7 +1586,18 @@ var A = window.A = {
   resetSayHelper: function(){
     confirmBox('Reset sounds?', 'Put all sounds back to the original way?', 'Reset', 'btn-orange').then(function(ok){ if (ok){ S.soundSay = {}; save(); renderAppSettings(); } });
   },
-  testHelper: function(){ var v = ($('saytest') || {}).value || ''; if (v.trim()){ stopSpeak(); speak(sayFor(v.trim()), {rate:0.8}); } },
+  testHelper: function(){
+    var v = String(($('saytest') || {}).value || '').trim().toLowerCase(); if (!v) return;
+    var box = $('sayhelper'), said = null;
+    if (box){
+      box.value.split(/\n/).forEach(function(line){
+        var m = line.split('='); if (m.length < 2) return;
+        if (m[0].trim().toLowerCase() === v){ var val = m.slice(1).join('=').trim(); if (val) said = val; }
+      });
+    }
+    stopSpeak(); speak(said || sayFor(v), {rate:0.8});
+    if (said && said !== sayFor(v)) toast('Testing your new sound — tap Save Sounds to keep it!');
+  },
   saveBackup: function(){
     try {
       var data = JSON.stringify({ app:'momma-practice-app', type:'backup', version:1, savedAt:new Date().toISOString(), data:S }, null, 2);
@@ -1299,6 +1609,40 @@ var A = window.A = {
       setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
       alertBox('Backup saved! 💾', 'Look in your <b>Downloads</b> folder for <b>' + esc(a.download) + '</b>. Keep it somewhere safe, like a USB stick or your email.');
     } catch(e){ alertBox('Oops', 'The backup could not be saved on this browser.'); }
+  },
+  loadLists: function(input){
+    var f = input.files && input.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var obj = null, norm = null;
+      try { obj = JSON.parse(r.result); norm = normalize(obj && obj.data ? obj.data : obj); } catch(e){}
+      input.value = '';
+      if (!norm){ alertBox('Hmm, that didn\'t work', 'That file isn\'t a backup from this app. Please pick a file named like <b>practice-backup-….json</b>.'); return; }
+      var when = obj && obj.savedAt ? new Date(obj.savedAt).toLocaleString() : 'an unknown date';
+      confirmBox('Load lists only?', 'Lists from <b>' + esc(when) + '</b> for: ' + esc(norm.kids.map(function(k){ return k.name; }).join(', ')) +
+        '.<br><br>This <b>replaces the word lists</b> on this computer. <b>Stars and history stay safe.</b>', 'Yes, load lists', 'btn-teal').then(function(ok){
+        if (!ok) return;
+        var updated = [], added = [];
+        norm.kids.forEach(function(nk){
+          var match = getKid(nk.id);
+          if (!match){ for (var i=0;i<S.kids.length;i++) if (S.kids[i].name.trim().toLowerCase() === nk.name.trim().toLowerCase()){ match = S.kids[i]; break; } }
+          if (match){
+            match.phonics = nk.phonics; match.heart = nk.heart; match.spelling = nk.spelling;
+            match.modes = nk.modes; match.counts = nk.counts;
+            updated.push(match.name);
+          } else {
+            nk.stars = 0; nk.history = []; if (getKid(nk.id)) nk.id = uid();
+            S.kids.push(nk); added.push(nk.name);
+          }
+        });
+        save();
+        alertBox('Lists loaded! 🎉', (updated.length ? 'Updated: <b>' + esc(updated.join(', ')) + '</b>. ' : '') +
+          (added.length ? 'Added new: <b>' + esc(added.join(', ')) + '</b>. ' : '') + 'Stars and history were kept.');
+        renderSettings();
+      });
+    };
+    r.onerror = function(){ alertBox('Oops', 'That file could not be read.'); };
+    r.readAsText(f);
   },
   loadBackup: function(input){
     var f = input.files && input.files[0]; if (!f) return;
