@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice Time!</title>
+<style>
+:root{
+  --ink:#263238; --muted:#607d8b;
+  --green:#43a047; --red:#e53935; --blue:#1e88e5; --purple:#7c4dff; --orange:#fb8c00;
+  --pink:#ec407a; --teal:#00897b; --gray:#78909c; --yellow:#ffca28;
+  --wordfont:"Century Gothic","Andika","Comic Sans MS","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Segoe UI Rounded","Arial Rounded MT Bold","Segoe UI",Arial,sans-serif;color:var(--ink);
+  background:linear-gradient(160deg,#fff8e1 0%,#e1f5fe 60%,#f3e5f5 100%);background-attachment:fixed;min-height:100vh;font-size:22px}
+#app{max-width:980px;margin:0 auto;padding:16px 16px 80px}
+h1{font-size:40px;margin:10px 0}
+h2{font-size:30px;margin:6px 0 12px}
+p{line-height:1.45}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:18px;font-size:24px;font-weight:700;padding:14px 22px;color:#fff;
+  background:var(--blue);box-shadow:0 5px 0 rgba(0,0,0,.2);transition:transform .08s,box-shadow .08s;margin:4px;line-height:1.2}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible{outline:4px solid #ffd54f;outline-offset:2px}
+.btn-green{background:var(--green)} .btn-red{background:var(--red)} .btn-blue{background:var(--blue)}
+.btn-purple{background:var(--purple)} .btn-orange{background:var(--orange)} .btn-pink{background:var(--pink)}
+.btn-teal{background:var(--teal)} .btn-gray{background:var(--gray)} .btn-white{background:#fff;color:var(--ink)}
+.small{font-size:17px;padding:9px 14px;border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.big{font-size:30px;padding:18px 30px;border-radius:22px}
+.huge{font-size:64px;min-width:150px;padding:14px 30px;border-radius:26px}
+.muted{color:var(--muted)}
+input,textarea,select{font-family:inherit;font-size:22px;padding:10px 14px;border:3px solid #b0bec5;border-radius:14px;width:100%;background:#fff;color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue)}
+label{display:block;font-weight:700;margin:14px 0 6px}
+.center{text-align:center}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+
+/* home */
+.title{font-size:52px;text-align:center;margin:20px 0 6px;color:#5e35b1;text-shadow:3px 3px 0 #fff}
+.subtitle{text-align:center;font-size:30px;margin:0 0 26px}
+.kidgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.kidbtn{min-height:190px;font-size:52px;border-radius:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:0}
+.kidstars{font-size:26px;background:rgba(255,255,255,.3);padding:4px 18px;border-radius:30px}
+.gear{position:fixed;top:12px;right:12px;font-size:26px;padding:8px 12px;background:#fff;color:#000;border-radius:16px;z-index:5}
+.homefoot{text-align:center;margin-top:36px}
+.warn{background:#fff3e0;border:3px solid #ffb74d;border-radius:18px;padding:12px 16px;margin:14px 0;font-size:20px}
+.info{background:#e3f2fd;border:3px solid #90caf9;border-radius:18px;padding:12px 16px;margin:14px 0;font-size:20px}
+
+/* kid page */
+.modegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;margin-top:20px}
+.modebtn{min-height:170px;font-size:38px;border-radius:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin:0}
+.modebtn .em{font-size:64px}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* lesson */
+.lessonbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.lbmid{flex:1;text-align:center;font-size:28px;font-weight:800}
+.lbstars{font-size:28px;font-weight:800;background:#fff;border-radius:20px;padding:6px 16px;box-shadow:0 3px 8px rgba(0,0,0,.1)}
+.lbstars small{font-size:18px;color:var(--muted)}
+.card{background:#fff;border-radius:34px;padding:22px 20px 18px;box-shadow:0 10px 30px rgba(0,0,0,.12);text-align:center;position:relative;border:7px solid #ffe082}
+.card.review{background:#f3e5f5;border-color:#ba68c8}
+.card.newsound{border-color:#4fc3f7;background:#e1f5fe}
+.card.spell{border-color:#b39ddb}
+.card.banner{border-color:#ba68c8;background:#f3e5f5;padding:40px 20px}
+.tag{display:inline-block;font-size:22px;font-weight:800;padding:6px 18px;border-radius:20px;color:#fff;background:var(--orange)}
+.tag.rev{background:#8e24aa}
+.word{font-family:var(--wordfont);font-size:clamp(64px,14vw,150px);font-weight:700;margin:26px 0 18px;line-height:1.15;word-break:break-word}
+.word.sound{font-size:clamp(90px,22vw,210px);color:#0277bd}
+.hl{color:#d81b60;background:#fff59d;border-radius:14px;padding:0 .04em}
+.ctrlrow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.hint{font-size:24px;margin:10px 0}
+.mic.listening{background:#ff1744;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.feedback{min-height:34px;font-size:24px;font-weight:700;margin:8px 0}
+.overrow{margin-top:14px}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(255,255,255,.55);z-index:50;pointer-events:none}
+.bigcheck{font-size:220px;line-height:1;color:#2e7d32;animation:pop .45s ease-out}
+.praise{font-size:56px;font-weight:900;color:#5e35b1;animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.segs{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;margin:18px 0}
+.seg{font-family:var(--wordfont);font-size:clamp(44px,9vw,72px);font-weight:700;color:#fff;padding:8px 22px;border-radius:20px;min-width:80px;transition:transform .2s,box-shadow .2s;opacity:.8;display:flex;flex-direction:column;align-items:center}
+.seg small{font-size:18px}
+.seg.on{transform:scale(1.2);opacity:1;box-shadow:0 0 0 7px #ffeb3b}
+.seg.silent{background:#b0bec5 !important}
+.dash{font-size:44px;font-weight:900;color:#90a4ae}
+.heartword{padding-top:.45em}
+.letter{position:relative;display:inline-block;transition:transform .2s,color .2s;padding:0 .02em}
+.letter.on{color:var(--blue);transform:scale(1.2)}
+.letter.glow{color:#e53935}
+.hm{position:absolute;top:-.5em;left:50%;transform:translateX(-50%);font-size:.42em;color:#e53935;line-height:1}
+.spellbox{font-family:var(--wordfont);font-size:clamp(40px,8vw,64px);text-align:center;max-width:620px;letter-spacing:.06em;margin:10px auto;display:block;border-width:5px;border-radius:22px}
+.cmp{margin:14px auto;display:inline-block;text-align:left}
+.cmprow{display:flex;align-items:center;gap:12px;margin:8px 0;flex-wrap:wrap}
+.cmplabel{font-size:22px;font-weight:800;width:190px}
+.cmpword{font-family:var(--wordfont);font-size:clamp(36px,7vw,58px);font-weight:700;display:flex;gap:2px}
+.cmpword span{padding:0 5px;border-radius:10px;min-width:.6em;text-align:center}
+.cmpword .bad{background:#ffcdd2;color:#c62828}
+.cmpword .fix{background:#c8e6c9;color:#1b5e20}
+.bigemoji{font-size:110px}
+
+/* done */
+.done h1{font-size:54px;color:#5e35b1}
+.starrow{font-size:60px;margin:10px 0;word-break:break-all}
+.stat{font-size:30px;font-weight:800;margin:8px 0}
+.missbox{background:#fff8e1;border:3px dashed #ffb74d;border-radius:20px;padding:14px;margin:18px auto;max-width:640px}
+.chip{display:inline-block;background:#fff;border:3px solid #ffb74d;border-radius:30px;padding:4px 16px;margin:5px;font-size:24px;font-weight:700}
+.confetti{position:fixed;top:-60px;font-size:34px;z-index:60;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+
+/* pin */
+.pinwrap{max-width:420px;margin:30px auto;text-align:center}
+.dots{display:flex;justify-content:center;gap:18px;margin:20px 0}
+.dot{width:34px;height:34px;border-radius:50%;border:4px solid #5e35b1;background:#fff}
+.dot.full{background:#5e35b1}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.keypad button{font-size:38px;padding:18px 0;margin:0;background:#fff;color:var(--ink)}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
+
+/* settings */
+.panel{background:#fff;border-radius:26px;padding:18px 20px;margin:18px 0;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.panel h2{display:flex;align-items:center;gap:10px}
+.lrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:2px solid #eceff1;padding:10px 0}
+.lrow:last-of-type{border-bottom:none}
+.lname{flex:1;min-width:200px;font-size:24px;font-weight:700}
+.snd{font-family:var(--wordfont);font-size:32px;color:#0277bd;margin-right:6px}
+.badge{display:inline-block;font-size:15px;font-weight:800;border-radius:12px;padding:3px 10px;color:#fff;vertical-align:middle;margin-left:6px}
+.badge.new{background:var(--orange)} .badge.review{background:#8e24aa}
+.toggle{background:#cfd8dc;color:var(--ink)}
+.toggle.on{background:var(--green);color:#fff}
+.swatch{width:46px;height:46px;border-radius:50%;padding:0;border:4px solid #fff;box-shadow:0 0 0 2px #b0bec5}
+.swatch.sel{box-shadow:0 0 0 5px var(--ink)}
+.kidrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:2px solid #eceff1;flex-wrap:wrap}
+.kiddot{width:30px;height:30px;border-radius:50%}
+.numin{width:110px;text-align:center}
+.trickrow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:10px 0}
+.letterbtn{font-family:var(--wordfont);font-size:38px;min-width:60px;padding:22px 12px 8px;background:#eceff1;color:var(--ink);position:relative}
+.letterbtn.on{background:#ffcdd2;color:#c62828}
+.letterbtn .hm{top:2px;font-size:22px}
+.sentrow{margin:10px 0;padding:10px;border-radius:16px;background:#f5f5f5}
+.sentrow b{font-family:var(--wordfont);font-size:30px}
+table{border-collapse:collapse;width:100%;font-size:19px}
+th,td{border-bottom:2px solid #eceff1;padding:8px;text-align:left;vertical-align:top}
+th{background:#ede7f6}
+.setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.setgrid button{min-height:110px;font-size:28px;margin:0}
+.help h2{color:#5e35b1;margin-top:26px}
+.badge.ok{background:#43a047} .badge.tts{background:#90a4ae}
+.recrow .lname{font-size:22px}
+.recrow .snd{font-size:30px}
+h3{font-size:22px;margin:18px 0 4px;color:#5e35b1}
+.help li{margin:8px 0;line-height:1.45}
+
+/* modal + toast */
+.modalwrap{position:fixed;inset:0;background:rgba(38,50,56,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal{background:#fff;border-radius:26px;padding:24px;max-width:560px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);max-height:90vh;overflow:auto}
+.mbtns{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:18px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#263238;color:#fff;padding:14px 26px;border-radius:30px;font-size:22px;font-weight:700;z-index:200;box-shadow:0 8px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+@media (max-width:600px){ body{font-size:19px} .title{font-size:38px} .kidbtn{font-size:40px;min-height:150px} .cmplabel{width:auto} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   BASIC HELPERS
+   ========================================================= */
+var KEY = 'mommaPracticeApp.v1';
+function app(){ return document.getElementById('app'); }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-3); }
+function shuffle(a){ a = a.slice(); for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function pick(a,n){ return shuffle(a).slice(0, Math.max(0,n)); }
+function wait(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+function clamp(v,lo,hi){ v = Number(v); if (isNaN(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+function dedupe(arr){ var seen = {}, out = []; arr.forEach(function(w){ var k = w.toLowerCase(); if (!seen[k]) { seen[k]=1; out.push(w); } }); return out; }
+function parseWords(text){ return dedupe(String(text||'').split(/[,\n\r;\t]+/).map(function(w){ return w.trim().replace(/\s+/g,' '); }).filter(Boolean)); }
+function plain(w){ return String(w).replace(/-/g,''); }   // phonics: dashes only mark sound breaks
+function cleanColor(c, fallback){ return /^#[0-9a-f]{6}$/i.test(c||'') ? c : fallback; }
+
+var KID_COLORS = ['#1e88e5','#ec407a','#43a047','#fb8c00','#7c4dff','#00acc1','#e53935','#8d6e63'];
+var SEG_COLORS = ['#e53935','#fb8c00','#43a047','#1e88e5','#8e24aa','#00897b','#d81b60','#6d4c41'];
+var MODES = {
+  phonics:  { name:'Phonics',     icon:'🔤', cls:'btn-orange', empty:'phonics sounds' },
+  heart:    { name:'Heart Words', icon:'❤️', cls:'btn-pink',   empty:'heart words' },
+  spelling: { name:'Spelling',    icon:'✏️', cls:'btn-purple', empty:'spelling words' }
+};
+var MODE_KEYS = ['phonics','heart','spelling'];
+
+/* How the speaker says each sound. Parents can change these in App Settings. */
+var DEFAULT_SAY = {
+  a:'ah', e:'eh', i:'ih', o:'aw', u:'uh',
+  b:'buh', c:'kuh', d:'duh', f:'fff', g:'guh', h:'huh', j:'juh', k:'kuh', l:'lll', m:'mmm', n:'nnn',
+  p:'puh', q:'kwuh', r:'rrr', s:'sss', t:'tuh', v:'vvv', w:'wuh', x:'ks', y:'yuh', z:'zzz',
+  sh:'shh', ch:'chuh', th:'thh', wh:'wuh', ph:'fff', ck:'kuh', ng:'nng', nk:'nk', qu:'kwuh', kn:'nnn', wr:'rrr',
+  tch:'chuh', dge:'juh', igh:'eye', eigh:'ay',
+  ee:'ee', ea:'ee', oa:'oh', ai:'ay', ay:'ay', oo:'oo', ou:'ow', ow:'ow', oi:'oy', oy:'oy',
+  ar:'ar', er:'er', ir:'er', ur:'er', or:'or', aw:'aw', au:'aw', ew:'oo', ie:'eye', ue:'oo', ey:'ay',
+  ll:'lll', ss:'sss', ff:'fff', zz:'zzz',
+  a_e:'ay', e_e:'ee', i_e:'eye', o_e:'oh', u_e:'you'
+};
+var GRAPHEMES = ['eigh','tch','dge','igh','sh','ch','th','wh','ph','ck','ng','nk','qu','kn','wr',
+  'ee','ea','oa','ai','ay','oo','ou','ow','oi','oy','ar','er','ir','or','ur','aw','au','ew','ie','ue','ey','ll','ss','ff','zz'];
+var LETTER_NAMES = {a:'ay',b:'bee',c:'see',d:'dee',e:'ee',f:'eff',g:'jee',h:'aitch',i:'eye',j:'jay',k:'kay',l:'el',m:'em',
+  n:'en',o:'oh',p:'pee',q:'cue',r:'ar',s:'ess',t:'tee',u:'you',v:'vee',w:'double you',x:'ex',y:'why',z:'zee'};
+var PRAISE = ['Great job!','You got it!','Awesome!','Super!','Way to go!','Fantastic!','Nice work!','You rock!'];
+
+/* =========================================================
+   DATA (saved automatically in this browser)
+   ========================================================= */
+function newKid(name, color){
+  return { id:uid(), name:name, color:color, stars:0,
+    modes:{ phonics:true, heart:true, spelling:true },
+    counts:{ phonics:5, review:3, heart:10, spelling:10 },
+    phonics:[], heart:[], spelling:[], history:[] };
+}
+function phonicsSound(sound, status, words){ return { id:uid(), sound:sound, say:'', status:status, words:parseWords(words).map(function(w){return w.toLowerCase();}) }; }
+
+function defaults(){
+  var j = newKid('Jackson', KID_COLORS[0]);
+  j.phonics = [
+    phonicsSound('sh','new','ship, shop, shed, shut, fish, dish, wish, cash, rush'),
+    phonicsSound('ck','new','duck, sock, back, kick, rock, neck, sick, pack, lock'),
+    phonicsSound('ng','new','ring, sing, king, wing, long, song, hang, bang, thing'),
+    phonicsSound('ee','review','see, bee, tree, feet, seed, green, sheep, keep, week')
+  ];
+  var tricky = { the:[2], said:[1,2], was:[1], of:[0,1], to:[1], you:[1,2], are:[2], they:[2,3], what:[2] };
+  j.heart = [{ id:uid(), name:'My Heart Words', status:'new',
+    words: parseWords('the, said, was, of, to, you, are, they, said, what').map(function(w){ return { w:w, t:(tricky[w]||[]).slice() }; }) }];
+  var a = newKid('Alexa', KID_COLORS[1]);
+  return { app:'momma-practice-app', version:1, pin:null, parentName:'Momma',
+    voiceURI:'', rate:0.85, useMic:true, sfx:true, maxTries:3, soundSay:{}, kids:[j, a] };
+}
+
+function normKid(k, idx){
+  if (!k || typeof k !== 'object') return null;
+  var n = newKid(String(k.name || 'Kid'), cleanColor(k.color, KID_COLORS[idx % KID_COLORS.length]));
+  if (k.id) n.id = String(k.id).replace(/[^a-z0-9]/gi,'') || n.id;
+  n.stars = Math.max(0, parseInt(k.stars,10) || 0);
+  if (k.modes) MODE_KEYS.forEach(function(m){ if (typeof k.modes[m] === 'boolean') n.modes[m] = k.modes[m]; });
+  if (k.counts) ['phonics','review','heart','spelling'].forEach(function(c){ if (k.counts[c] != null) n.counts[c] = clamp(k.counts[c], c==='review'?0:1, 50); });
+  function normList(l, mode){
+    if (!l || typeof l !== 'object') return null;
+    var o = { id: String(l.id || uid()).replace(/[^a-z0-9]/gi,'') || uid(), status: l.status === 'review' ? 'review' : 'new' };
+    var words = Array.isArray(l.words) ? l.words : [];
+    if (mode === 'phonics'){
+      o.sound = String(l.sound || ''); o.say = String(l.say || '');
+      o.words = dedupe(words.map(function(w){ return String(typeof w === 'object' ? (w.w||'') : w).toLowerCase().trim(); }).filter(Boolean));
+    } else {
+      o.name = String(l.name || 'My List');
+      var seen = {};
+      o.words = [];
+      words.forEach(function(w){
+        var obj = typeof w === 'object' && w ? w : { w:String(w||'') };
+        var text = String(obj.w || '').trim(); if (!text || seen[text.toLowerCase()]) return;
+        seen[text.toLowerCase()] = 1;
+        if (mode === 'heart') o.words.push({ w:text, t:(Array.isArray(obj.t)?obj.t:[]).map(Number).filter(function(i){ return i>=0 && i<text.length; }) });
+        else o.words.push({ w:text, s:String(obj.s || '') });
+      });
+    }
+    return o;
+  }
+  MODE_KEYS.forEach(function(m){ n[m] = (Array.isArray(k[m]) ? k[m] : []).map(function(l){ return normList(l,m); }).filter(Boolean); });
+  n.history = (Array.isArray(k.history) ? k.history : []).filter(function(h){ return h && h.date; }).map(function(h){
+    return { date:String(h.date), mode:MODES[h.mode] ? h.mode : 'phonics', total:+h.total||0, firstTry:+h.firstTry||0, stars:+h.stars||0,
+      missed:Array.isArray(h.missed) ? h.missed.map(String) : [] };
+  });
+  return n;
+}
+function normalize(d){
+  if (!d || typeof d !== 'object' || !Array.isArray(d.kids)) return null;
+  var base = defaults();
+  var o = { app:'momma-practice-app', version:1,
+    pin: /^\d{4}$/.test(d.pin || '') ? d.pin : null,
+    parentName: String(d.parentName || base.parentName),
+    voiceURI: String(d.voiceURI || ''),
+    rate: clamp(d.rate == null ? base.rate : d.rate, 0.4, 1.5),
+    useMic: d.useMic !== false, sfx: d.sfx !== false,
+    maxTries: clamp(d.maxTries == null ? 3 : d.maxTries, 1, 10),
+    soundSay: {}, kids: [] };
+  if (d.soundSay && typeof d.soundSay === 'object') Object.keys(d.soundSay).forEach(function(k){ o.soundSay[String(k).toLowerCase()] = String(d.soundSay[k]); });
+  var ids = {};
+  d.kids.forEach(function(k,i){ var nk = normKid(k,i); if (nk){ if (ids[nk.id]) nk.id = uid(); ids[nk.id]=1; o.kids.push(nk); } });
+  return o;
+}
+
+var S = null, storageOK = true;
+try { S = normalize(JSON.parse(localStorage.getItem(KEY))); } catch(e){ S = null; }
+if (!S) S = defaults();
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; }
+  catch(e){ storageOK = false; toast('Uh oh — this browser would not save. Please use Save Backup.'); }
+}
+save();
+
+function getKid(id){ for (var i=0;i<S.kids.length;i++) if (S.kids[i].id === id) return S.kids[i]; return null; }
+function getList(k, mode, id){ var a = k[mode]; for (var i=0;i<a.length;i++) if (a[i].id === id) return a[i]; return null; }
+function sayFor(g){ g = String(g||'').toLowerCase(); return S.soundSay[g] || DEFAULT_SAY[g] || g; }
+function pName(){ return esc(S.parentName || 'Momma'); }
+
+/* =========================================================
+   SOUNDS: speaking voice + happy/oops sounds
+   ========================================================= */
+var hasTTS = 'speechSynthesis' in window;
+function voices(){ try { return hasTTS ? (speechSynthesis.getVoices() || []) : []; } catch(e){ return []; } }
+function getVoice(){
+  var vs = voices(); if (!vs.length) return null;
+  if (S.voiceURI){ for (var i=0;i<vs.length;i++) if (vs[i].voiceURI === S.voiceURI) return vs[i]; }
+  var en = vs.filter(function(v){ return /^en[-_]US/i.test(v.lang); });
+  var pref = ['Ana','Aria','Jenny','Google US English','Zira'];
+  for (var p=0;p<pref.length;p++){ for (var q=0;q<en.length;q++) if (en[q].name.indexOf(pref[p]) >= 0) return en[q]; }
+  return en[0] || vs.filter(function(v){ return /^en/i.test(v.lang); })[0] || null;
+}
+function speak(text, opt){
+  opt = opt || {};
+  return new Promise(function(res){
+    text = String(text || '').trim();
+    if (!text || !hasTTS){ res(); return; }
+    try {
+      var u = new SpeechSynthesisUtterance(text);
+      var v = getVoice(); if (v){ u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
+      u.rate = clamp((opt.rate || 1) * S.rate, 0.3, 2);
+      var done = false;
+      var t = setTimeout(fin, 2500 + text.length * 220 / u.rate);
+      function fin(){ if (done) return; done = true; clearTimeout(t); res(); }
+      u.onend = fin; u.onerror = fin;
+      window.__utter = u;            // keeps Chrome from losing the "done" signal
+      var delay = Math.max(0, 150 - (Date.now() - lastCancel));   // Chrome drops speech started right after a stop
+      setTimeout(function(){ try { speechSynthesis.resume(); speechSynthesis.speak(u); } catch(e){ fin(); } }, delay);
+    } catch(e){ res(); }
+  });
+}
+var lastCancel = 0;
+function stopSpeak(){
+  try { if (hasTTS){ speechSynthesis.cancel(); lastCancel = Date.now(); } } catch(e){}
+  audioGen++;
+  if (curAudio){ try { curAudio.pause(); } catch(e){} curAudio = null; }
+}
+
+/* =========================================================
+   MOMMA'S VOICE RECORDINGS (saved in this browser)
+   Keys:  snd:sh   = the sound "sh"
+          word:wish = the word broken into sounds, then blended
+   ========================================================= */
+var REC = {};          // which recordings exist
+var URLC = {};         // ready-to-play links
+var curAudio = null, audioGen = 0, RA = null, RLABEL = {};
+var idbConn = null;
+function idb(){
+  return new Promise(function(res, rej){
+    if (idbConn) return res(idbConn);
+    if (!window.indexedDB) return rej(new Error('no-idb'));
+    var r = indexedDB.open('mommaPracticeAudio', 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore('rec'); };
+    r.onsuccess = function(){ idbConn = r.result; res(idbConn); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function idbDo(mode, fn){
+  return idb().then(function(d){ return new Promise(function(res, rej){
+    var t = d.transaction('rec', mode), st = t.objectStore('rec'), out = { v:null };
+    fn(st, out);
+    t.oncomplete = function(){ res(out.v); }; t.onerror = function(){ rej(t.error); }; t.onabort = function(){ rej(t.error); };
+  }); });
+}
+function recPut(key, blob){
+  return idbDo('readwrite', function(st){ st.put(blob, key); }).then(function(){
+    if (URLC[key]){ URL.revokeObjectURL(URLC[key]); delete URLC[key]; }
+    REC[key] = 1;
+  });
+}
+function recGet(key){ return idbDo('readonly', function(st, out){ var r = st.get(key); r.onsuccess = function(){ out.v = r.result || null; }; }); }
+function recDel(key){
+  return idbDo('readwrite', function(st){ st.delete(key); }).then(function(){
+    if (URLC[key]){ URL.revokeObjectURL(URLC[key]); delete URLC[key]; }
+    delete REC[key];
+  });
+}
+function recAll(){
+  return idbDo('readonly', function(st, out){
+    out.v = [];
+    var r = st.openCursor();
+    r.onsuccess = function(){ var c = r.result; if (c){ out.v.push({ key:String(c.key), blob:c.value }); c.continue(); } };
+  });
+}
+function recLoadKeys(){
+  return idbDo('readonly', function(st, out){ var r = st.getAllKeys(); r.onsuccess = function(){ out.v = r.result || []; }; })
+    .then(function(ks){ REC = {}; ks.forEach(function(k){ REC[String(k)] = 1; }); })
+    .catch(function(){});
+}
+recLoadKeys();
+function sndKey(g){ return 'snd:' + String(g || '').toLowerCase().trim(); }
+function wordKey(w){ return 'word:' + plain(String(w || '')).toLowerCase().trim(); }
+function ek(k){ return encodeURIComponent(k).replace(/'/g, '%27'); }
+
+function getURL(key){
+  if (URLC[key]) return Promise.resolve(URLC[key]);
+  return recGet(key).then(function(b){ if (!b) return null; URLC[key] = URL.createObjectURL(b); return URLC[key]; }).catch(function(){ return null; });
+}
+/* Plays a recording. Resolves true if it played (or was stopped), false if there is no recording. */
+function playRec(key, rate){
+  if (!REC[key]) return Promise.resolve(false);
+  var gen = audioGen;
+  return getURL(key).then(function(url){
+    if (!url) return false;
+    if (gen !== audioGen) return true;
+    return new Promise(function(res){
+      var a = new Audio(url), done = false;
+      curAudio = a;
+      try { a.playbackRate = rate || 1; } catch(e){}
+      function fin(){ if (done) return; done = true; clearTimeout(t); if (curAudio === a) curAudio = null; res(true); }
+      a.onended = fin; a.onerror = fin; a.onpause = fin;
+      var t = setTimeout(fin, 20000);
+      var p = a.play(); if (p && p.catch) p.catch(fin);
+    });
+  });
+}
+/* Momma's recording if there is one, otherwise the computer voice. */
+function sayOrPlay(key, text, opt){
+  opt = opt || {};
+  return playRec(key, opt.prate).then(function(ok){ return ok ? true : speak(text, opt); });
+}
+
+/* Clean up a recording: cut the quiet parts at the start and end, even out the volume. */
+function processRec(blob){
+  var C = window.AudioContext || window.webkitAudioContext;
+  if (!C || !blob.arrayBuffer) return Promise.resolve(blob);
+  return blob.arrayBuffer().then(function(buf){
+    var ctx = new C();
+    return new Promise(function(res, rej){ ctx.decodeAudioData(buf, res, rej); }).then(function(ab){
+      try { ctx.close(); } catch(e){}
+      var len = ab.length, ch = ab.numberOfChannels, rate = ab.sampleRate, mono = new Float32Array(len), i, c;
+      for (c=0;c<ch;c++){ var d = ab.getChannelData(c); for (i=0;i<len;i++) mono[i] += d[i] / ch; }
+      var peak = 0; for (i=0;i<len;i++){ var v = Math.abs(mono[i]); if (v > peak) peak = v; }
+      if (peak < 0.005) return blob;   // nearly silent — keep as is
+      var thr = Math.max(0.02, peak * 0.08), s0 = 0, s1 = len - 1;
+      while (s0 < len && Math.abs(mono[s0]) < thr) s0++;
+      while (s1 > s0 && Math.abs(mono[s1]) < thr) s1--;
+      s0 = Math.max(0, s0 - Math.floor(rate * 0.06));
+      s1 = Math.min(len, s1 + Math.floor(rate * 0.15));
+      var part = mono.subarray(s0, s1), gain = Math.min(4, 0.9 / peak);
+      // shrink the file: make it about 24,000 samples a second
+      var step = Math.max(1, Math.floor(rate / 22050)), outRate = rate / step, n = Math.floor(part.length / step), out = new Float32Array(n);
+      for (i=0;i<n;i++){ var sum = 0; for (var j=0;j<step;j++) sum += part[i*step + j]; out[i] = Math.max(-1, Math.min(1, sum / step * gain)); }
+      // short fade in/out so it doesn't click
+      var f = Math.min(Math.floor(outRate * 0.01), Math.floor(n / 2));
+      for (i=0;i<f;i++){ out[i] *= i / f; out[n-1-i] *= i / f; }
+      return wavBlob(out, Math.round(outRate));
+    });
+  }).catch(function(){ return blob; });
+}
+function wavBlob(samples, rate){
+  var buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf), o = 0;
+  function str(s){ for (var i=0;i<s.length;i++) v.setUint8(o++, s.charCodeAt(i)); }
+  function u32(x){ v.setUint32(o, x, true); o += 4; }
+  function u16(x){ v.setUint16(o, x, true); o += 2; }
+  str('RIFF'); u32(36 + samples.length * 2); str('WAVE'); str('fmt '); u32(16); u16(1); u16(1); u32(rate); u32(rate * 2); u16(2); u16(16);
+  str('data'); u32(samples.length * 2);
+  for (var i=0;i<samples.length;i++){ var x = Math.max(-1, Math.min(1, samples[i])); v.setInt16(o, x < 0 ? x * 0x8000 : x * 0x7fff, true); o += 2; }
+  return new Blob([buf], { type:'audio/wav' });
+}
+
+function startRec(key){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+    alertBox('Oops', 'This browser can\'t record. Please use Chrome or Edge.'); return;
+  }
+  stopSpeak();
+  navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } }).then(function(stream){
+    var chunks = [], mr;
+    try { mr = new MediaRecorder(stream); } catch(e){ stream.getTracks().forEach(function(t){ t.stop(); }); alertBox('Oops', 'Recording could not start.'); return; }
+    RA = { key:key, mr:mr, stream:stream, timer:null };
+    mr.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+    mr.onstop = function(){
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      if (RA){ clearTimeout(RA.timer); } RA = null;
+      var blob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
+      if (!blob.size){ updateRecRow(key); toast('Nothing was recorded. Try again!'); return; }
+      processRec(blob).then(function(b){ return recPut(key, b); }).then(function(){
+        updateRecRow(key); toast('Saved! 🎙️ Here it is…'); playRec(key);
+      }).catch(function(){ updateRecRow(key); alertBox('Oops', 'That recording could not be saved on this browser.'); });
+    };
+    mr.start();
+    RA.timer = setTimeout(stopRec, 15000);   // stops by itself after 15 seconds
+    updateRecRow(key);
+  }).catch(function(){
+    alertBox('Microphone needed 🎤', 'The browser needs permission to use the microphone. Click the little <b>lock</b> or <b>mic</b> icon next to the web address, choose <b>Allow</b>, then try again.');
+  });
+}
+function stopRec(){ if (RA && RA.mr && RA.mr.state !== 'inactive'){ try { RA.mr.stop(); } catch(e){} } }
+
+function recRowHtml(key, label){
+  RLABEL[key] = label;
+  var has = !!REC[key], on = RA && RA.key === key, k = ek(key);
+  return '<div class="lrow recrow" id="rr-' + k + '"><div class="lname">' + label + ' ' +
+    (has ? '<span class="badge ok">✔ My voice</span>' : '<span class="badge tts">Computer voice</span>') + '</div>' +
+    '<button class="small ' + (on ? 'btn-red mic listening' : 'btn-red') + '" onclick="A.rec(\'' + k + '\')">' + (on ? '⏹ Stop' : '⏺ ' + (has ? 'Redo' : 'Record')) + '</button>' +
+    (has ? '<button class="small btn-blue" onclick="A.playRec(\'' + k + '\')">▶ Play</button><button class="small btn-gray" onclick="A.delRec(\'' + k + '\')" aria-label="Delete recording">🗑️</button>' : '') +
+    '</div>';
+}
+function updateRecRow(key){
+  var el = document.getElementById('rr-' + ek(key));
+  if (el && RLABEL[key] != null) el.outerHTML = recRowHtml(key, RLABEL[key]);
+}
+if (hasTTS){ try { speechSynthesis.onvoiceschanged = function(){ if (screen === 'appset') fillVoices(); }; voices(); } catch(e){} }
+
+var actx = null;
+function tone(freq, start, dur, type, vol){
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    var o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + start;
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol || 0.2, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+  } catch(e){}
+}
+function sfxHappy(){ if (!S.sfx) return; [523,659,784,1047].forEach(function(f,i){ tone(f, i*0.09, 0.25, 'triangle', 0.22); }); }
+function sfxOops(){ if (!S.sfx) return; tone(392,0,0.22,'sine',0.15); tone(311,0.2,0.35,'sine',0.15); }
+function sfxTada(){ if (!S.sfx) return; [523,659,784,659,784,1047].forEach(function(f,i){ tone(f, i*0.12, 0.3, 'triangle', 0.22); }); tone(1047,0.75,0.7,'triangle',0.2); }
+
+/* =========================================================
+   LISTENING (speech recognition)
+   ========================================================= */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var micBlocked = '';      // reason the microphone can't be used right now
+var activeRec = null;
+function micAvailable(){ return !!SR && S.useMic && !micBlocked; }
+function micMsg(){
+  if (!S.useMic) return 'Microphone checking is turned off. Grown-up: listen, then tap ✔ or ✘.';
+  if (!SR) return 'This browser can\'t listen for words. No problem! Grown-up: listen, then tap ✔ or ✘. (Tip: Chrome or Edge can listen.)';
+  if (micBlocked === 'network') return 'The listening helper needs the internet, and it couldn\'t connect. Grown-up: listen, then tap ✔ or ✘.';
+  if (micBlocked === 'nomic') return 'I can\'t find a microphone. Grown-up: listen, then tap ✔ or ✘.';
+  return 'The microphone isn\'t allowed right now. No problem! Grown-up: listen, then tap ✔ or ✘. (To allow it, click the little lock or mic icon next to the web address and choose Allow.)';
+}
+function listen(){
+  return new Promise(function(resolve){
+    var r, results = [], err = null, finished = false;
+    try { r = new SR(); } catch(e){ resolve({ error:'unavailable', results:[] }); return; }
+    activeRec = r;
+    r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 5; r.continuous = false;
+    r.onresult = function(e){ for (var i=0;i<e.results.length;i++) for (var j=0;j<e.results[i].length;j++) results.push(e.results[i][j].transcript); };
+    r.onerror = function(e){ err = e.error; };
+    r.onend = function(){ if (finished) return; finished = true; if (activeRec === r) activeRec = null; resolve({ results:results, error: results.length ? null : (err || 'no-speech') }); };
+    try { r.start(); } catch(e){ finished = true; resolve({ error:'start-failed', results:[] }); return; }
+    setTimeout(function(){ try { r.stop(); } catch(e){} }, 8000);
+    // safety net: never leave the button stuck on "Listening…"
+    setTimeout(function(){ if (finished) return; finished = true; try { r.abort(); } catch(e){} if (activeRec === r) activeRec = null; resolve({ results:results, error: results.length ? null : (err || 'no-speech') }); }, 11000);
+  });
+}
+function stopListening(){ if (activeRec){ try { activeRec.abort(); } catch(e){} activeRec = null; } }
+
+var HOMOPHONES = ['to two too 2','see sea c','bee be b','you u ewe yu','are r','for four 4','one won 1','eight ate 8','why y',
+  'oh o owe','i eye aye','tea tee t','pea pee p','right write','there their theyre','no know','new knew','by buy bye','hi high',
+  'week weak','meet meat','sun son','flower flour','dear deer','here hear','hole whole','blue blew','made maid','tail tale',
+  'sale sail','some sum','would wood','not knot','night knight','road rode','pair pear','way weigh','wait weight','which witch',
+  'feet feat','ring wring','peace piece','plane plain','mail male','sent cent scent','through threw','been bin','our hour',
+  'its it\'s','were whirr','the da duh','of uv','was wuz','what wut','they thay','said sed'];
+var HMAP = {};
+HOMOPHONES.forEach(function(g){ var ws = g.split(' '); ws.forEach(function(w){ HMAP[w] = (HMAP[w] || []).concat(ws); }); });
+function normText(s){ return String(s).toLowerCase().replace(/[’`]/g,"'").replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim(); }
+function isMatch(target, heard){
+  var t = normText(plain(target)); if (!t) return false;
+  var accept = {}; [t, t.replace(/'/g,'')].concat(HMAP[t] || HMAP[t.replace(/'/g,'')] || []).forEach(function(w){ accept[w] = 1; });
+  for (var i=0;i<heard.length;i++){
+    var n = normText(heard[i]); if (!n) continue;
+    if (accept[n] || accept[n.replace(/[ ']/g,'')]) return true;
+    var ws = n.split(' ');
+    for (var j=0;j<ws.length;j++) if (accept[ws[j]] || accept[ws[j].replace(/'/g,'')]) return true;
+    if (t.indexOf(' ') >= 0 && n.indexOf(t) >= 0) return true;
+  }
+  return false;
+}
+
+/* =========================================================
+   PHONICS HELPERS (highlighting + breaking words into sounds)
+   ========================================================= */
+function highlightWord(word, target){
+  var w = plain(word), lw = w.toLowerCase(), lt = String(target||'').toLowerCase(), out = '', i = 0;
+  while (i < w.length){
+    if (lt && lw.substr(i, lt.length) === lt){ out += '<span class="hl">' + esc(w.substr(i, lt.length)) + '</span>'; i += lt.length; }
+    else { out += esc(w[i]); i++; }
+  }
+  return out;
+}
+function segment(word, target, targetSay){
+  var segs = [];
+  if (word.indexOf('-') >= 0){
+    word.split('-').filter(Boolean).forEach(function(t){ segs.push({ t:t, say: (target && t.toLowerCase() === target.toLowerCase() && targetSay) ? targetSay : sayFor(t) }); });
+    return segs;
+  }
+  var w = word.toLowerCase(), tg = String(target||'').toLowerCase(), i = 0, V = 'aeiou';
+  while (i < w.length){
+    var m = null;
+    if (tg && w.substr(i, tg.length) === tg) m = tg;
+    else for (var g=0; g<GRAPHEMES.length; g++){ if (w.substr(i, GRAPHEMES[g].length) === GRAPHEMES[g]){ m = GRAPHEMES[g]; break; } }
+    if (!m) m = w[i];
+    segs.push({ t: word.substr(i, m.length), g:m }); i += m.length;
+  }
+  var n = segs.length;
+  if (n >= 3 && segs[n-1].g === 'e' && segs[n-2].g.length === 1 && V.indexOf(segs[n-2].g) < 0 && segs[n-3].g.length === 1 && V.indexOf(segs[n-3].g) >= 0){
+    segs[n-3].long = true; segs[n-1].silent = true;
+  }
+  if (n >= 2 && segs[n-1].g === 'y' && V.indexOf(segs[n-2].g.slice(-1)) < 0){
+    var hasV = segs.slice(0, n-1).some(function(s){ return /[aeiou]/.test(s.g); });
+    segs[n-1].yv = hasV ? 'ee' : 'eye';
+  }
+  segs.forEach(function(s){
+    s.say = s.silent ? '' : s.long ? sayFor(s.g + '_e') : s.yv ? s.yv : (tg && s.g === tg && targetSay) ? targetSay : sayFor(s.g);
+  });
+  return segs;
+}
+
+/* =========================================================
+   SCREENS + SMALL UI PIECES
+   ========================================================= */
+var screen = 'home', unlocked = false, curKidId = null, helpBack = 'home';
+function show(html){
+  if (RA) stopRec();
+  Array.prototype.forEach.call(document.querySelectorAll('.confetti,.overlay'), function(e){ e.remove(); });
+  app().innerHTML = html; window.scrollTo(0,0);
+}
+function toast(msg){
+  Array.prototype.forEach.call(document.querySelectorAll('.toast'), function(e){ e.remove(); });
+  var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2600);
+}
+function modal(opts){
+  return new Promise(function(res){
+    var wrap = document.createElement('div'); wrap.className = 'modalwrap';
+    wrap.innerHTML = '<div class="modal"><h2>' + esc(opts.title) + '</h2><div>' + (opts.body || '') + '</div><div class="mbtns">' +
+      opts.buttons.map(function(b,i){ return '<button data-i="' + i + '" class="' + (b.cls||'') + '">' + esc(b.label) + '</button>'; }).join('') + '</div></div>';
+    document.body.appendChild(wrap);
+    function close(i){
+      var inp = wrap.querySelector('input'); var val = inp ? inp.value : null;
+      wrap.remove(); res({ ok: !!opts.buttons[i].ok, value: val });
+    }
+    Array.prototype.forEach.call(wrap.querySelectorAll('.mbtns button'), function(b){ b.onclick = function(){ close(+b.getAttribute('data-i')); }; });
+    var inp = wrap.querySelector('input');
+    if (inp){ inp.focus(); inp.select(); inp.onkeydown = function(e){ if (e.key === 'Enter'){ for (var i=0;i<opts.buttons.length;i++) if (opts.buttons[i].ok){ close(i); return; } } }; }
+  });
+}
+function confirmBox(title, bodyHtml, okLabel, cls){
+  return modal({ title:title, body:'<p>' + bodyHtml + '</p>', buttons:[{label:'Cancel', cls:'btn-gray'}, {label:okLabel || 'Yes', cls:cls || 'btn-red', ok:true}] }).then(function(r){ return r.ok; });
+}
+function alertBox(title, bodyHtml){ return modal({ title:title, body:'<p>' + bodyHtml + '</p>', buttons:[{label:'OK', cls:'btn-blue', ok:true}] }); }
+function promptBox(title, label, value){
+  return modal({ title:title, body:'<label>' + esc(label) + '</label><input id="mval" value="' + esc(value||'') + '">',
+    buttons:[{label:'Cancel', cls:'btn-gray'}, {label:'OK', cls:'btn-green', ok:true}] }).then(function(r){ return r.ok ? r.value : null; });
+}
+function stopAll(){ stopSpeak(); stopListening(); if (L){ L.ctok++; L.stok++; } }
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  stopAll(); L = null; screen = 'home'; unlocked = false;
+  var h = '<button class="gear" onclick="A.settings()" title="Parent Settings" aria-label="Parent Settings">⚙️</button>' +
+    '<h1 class="title">🌟 Practice Time! 🌟</h1><p class="subtitle">Who is practicing today?</p>';
+  if (!storageOK) h += '<div class="warn">⚠️ This browser isn\'t saving right now. Ask a grown-up to use <b>Save Backup</b> in Parent Settings.</div>';
+  if (!S.kids.length) h += '<div class="info center">No kids yet! Grown-up: tap the ⚙️ gear (top right) to add one.</div>';
+  h += '<div class="kidgrid">' + S.kids.map(function(k){
+    return '<button class="kidbtn" style="background:' + k.color + '" onclick="A.kid(\'' + k.id + '\')"><span>' + esc(k.name) + '</span><span class="kidstars">⭐ ' + k.stars + '</span></button>';
+  }).join('') + '</div>';
+  h += '<div class="homefoot"><button class="btn-white small" onclick="A.help()">❓ How to Use</button></div>';
+  show(h);
+}
+
+/* ---------- KID PAGE ---------- */
+function renderKid(id){
+  stopAll(); L = null; screen = 'kid';
+  var k = getKid(id); if (!k) return renderHome();
+  curKidId = id;
+  var h = '<div class="topbar"><button class="btn-gray small" onclick="A.home()">🏠 Home</button></div>' +
+    '<h1 class="title" style="color:' + k.color + '">Hi, ' + esc(k.name) + '! 👋</h1>' +
+    '<p class="subtitle">You have ⭐ <b>' + k.stars + '</b> stars! What do you want to practice?</p>';
+  var on = MODE_KEYS.filter(function(m){ return k.modes[m]; });
+  if (!on.length) h += '<div class="info center">Ask ' + pName() + ' to turn on a practice for you!</div>';
+  h += '<div class="modegrid">' + on.map(function(m){
+    return '<button class="modebtn ' + MODES[m].cls + '" onclick="A.start(\'' + m + '\')"><span class="em">' + MODES[m].icon + '</span>' + MODES[m].name + '</button>';
+  }).join('') + '</div>';
+  if (on.length && (!SR || !S.useMic)) h += '<div class="info">🎤 ' + esc(micMsg()) + '</div>';
+  show(h);
+}
+
+/* =========================================================
+   LESSONS
+   ========================================================= */
+var L = null;
+function mkCard(o){ o.tries = 0; o.state = null; o.correct = false; return o; }
+
+function buildDeck(k, mode){
+  var cards = [], c = k.counts;
+  if (mode === 'phonics'){
+    k.phonics.filter(function(s){ return s.status === 'new' && s.words.length; }).forEach(function(s){
+      cards.push(mkCard({ kind:'sound', sound:s.sound, say:s.say || sayFor(s.sound), label:'sound "' + s.sound + '"', noRequeue:true }));
+      pick(s.words, c.phonics).forEach(function(w){ cards.push(mkCard({ kind:'pword', word:w, sound:s.sound, tsay:s.say, review:false, label:plain(w) })); });
+    });
+    var pool = [];
+    k.phonics.filter(function(s){ return s.status === 'review'; }).forEach(function(s){ s.words.forEach(function(w){ pool.push({ w:w, s:s }); }); });
+    var rv = pick(pool, c.review);
+    if (rv.length){
+      cards.push({ kind:'banner' });
+      rv.forEach(function(p){ cards.push(mkCard({ kind:'pword', word:p.w, sound:p.s.sound, tsay:p.s.say, review:true, label:plain(p.w) })); });
+    }
+  } else {
+    var lists = k[mode], seen = {};
+    function poolOf(status){
+      var out = [];
+      lists.filter(function(l){ return l.status === status; }).forEach(function(l){ l.words.forEach(function(w){ var key = w.w.toLowerCase(); if (!seen[key + status]){ seen[key + status] = 1; out.push(w); } }); });
+      return out;
+    }
+    var main = pick(poolOf('new'), mode === 'heart' ? c.heart : c.spelling);
+    var used = {}; main.forEach(function(w){ used[w.w.toLowerCase()] = 1; });
+    var revs = pick(poolOf('review').filter(function(w){ return !used[w.w.toLowerCase()]; }), c.review);
+    function card(w, review){
+      return mode === 'heart' ? mkCard({ kind:'heart', word:w.w, tricky:w.t.slice(), review:review, label:w.w })
+                              : mkCard({ kind:'spell', word:w.w, sentence:w.s, review:review, label:w.w });
+    }
+    main.forEach(function(w){ cards.push(card(w,false)); });
+    if (revs.length){ if (main.length) cards.push({ kind:'banner' }); revs.forEach(function(w){ cards.push(card(w,true)); }); }
+  }
+  return cards;
+}
+
+function startLesson(mode){
+  var k = getKid(curKidId); if (!k) return renderHome();
+  var deck = buildDeck(k, mode);
+  if (!deck.some(function(c){ return c.kind !== 'banner'; })){
+    stopAll(); screen = 'empty';
+    show('<div class="topbar"><button class="btn-gray small" onclick="A.kid(\'' + k.id + '\')">⬅ Back</button></div>' +
+      '<div class="card" style="margin-top:30px"><div class="bigemoji">📝</div><h1>Ask ' + pName() + ' to add your ' + MODES[mode].empty + '!</h1>' +
+      '<p class="hint">There\'s nothing to practice here yet.</p><button class="btn-blue big" onclick="A.kid(\'' + k.id + '\')">OK!</button></div>');
+    return;
+  }
+  L = { kidId:k.id, mode:mode, deck:deck, all:deck.slice(), card:null, stars:0, ctok:0, stok:0 };
+  nextCard(true);
+}
+function newSpeech(){ L.stok++; stopSpeak(); return L.stok; }
+function alive(tok){ return L && L.stok === tok && screen === 'lesson'; }
+
+function nextCard(first){
+  if (!L) return;
+  var c = L.card;
+  if (!first && c && c.state === 'wrong' && !c.noRequeue && c.tries < S.maxTries){ c.state = null; L.deck.push(c); }
+  L.ctok++; newSpeech(); stopListening();
+  L.card = L.deck.shift();
+  if (!L.card) return finishLesson();
+  renderLesson();
+}
+
+function controlsHtml(c){
+  var h = '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear it</button>';
+  if (micAvailable()) h += '<button class="btn-red big mic" id="micbtn" onclick="A.mic()">🎤 Say it</button>';
+  h += '</div>';
+  if (micAvailable()) h += '<p class="hint">Read the word, then tap 🎤 and say it!</p>';
+  else h += '<p class="hint">' + esc(micMsg()) + '</p><div class="ctrlrow"><button class="btn-green huge" onclick="A.right()" aria-label="Correct">✔</button><button class="btn-red huge" onclick="A.wrong()" aria-label="Not yet">✘</button></div>';
+  h += '<div id="feedback" class="feedback"></div>';
+  h += '<div class="overrow"><button class="btn-gray small" onclick="A.override()">👍 Parent Override: mark correct</button></div>';
+  return h;
+}
+function heartWordHtml(c){
+  return '<div class="word heartword">' + c.word.split('').map(function(ch,i){
+    var tr = c.tricky.indexOf(i) >= 0;
+    return '<span class="letter" id="lt' + i + '">' + (tr ? '<span class="hm">♥</span>' : '') + esc(ch) + '</span>';
+  }).join('') + '</div>';
+}
+
+function renderLesson(){
+  screen = 'lesson';
+  var c = L.card, k = getKid(L.kidId), m = MODES[L.mode];
+  var left = L.deck.filter(function(x){ return x.kind !== 'banner'; }).length + (c.kind === 'banner' ? 0 : 1);
+  var h = '<div class="lessonbar"><button class="btn-gray small" onclick="A.quit()">🏠 Stop</button><div class="lbmid">' + m.icon + ' ' + m.name + '</div>' +
+    '<div class="lbstars">⭐ <span id="starcount">' + L.stars + '</span> <small>· ' + left + ' left</small></div></div>';
+  var tag = c.review ? '<span class="tag rev">🔁 Review</span>' : '';
+  if (c.kind === 'banner'){
+    h += '<div class="card banner"><div class="bigemoji">🔁</div><h1>Quick Review!</h1><p class="hint">Let\'s practice some words you already know!</p>' +
+      '<button class="btn-green big" onclick="A.next()">Let\'s Go ➜</button></div>';
+  } else if (c.kind === 'sound'){
+    h += '<div class="card newsound"><span class="tag">✨ New Sound!</span><div class="word sound">' + esc(c.sound) + '</div><div id="zone">' +
+      '<p class="hint">👂 Listen, then say it with me' + (k ? ', ' + esc(k.name) : '') + '!</p>' +
+      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear it again</button><button class="btn-green big" onclick="A.next()">Next ➜</button></div></div></div>';
+  } else if (c.kind === 'pword'){
+    h += '<div class="card ' + (c.review ? 'review' : '') + '">' + tag + '<div class="word" id="wordel">' + highlightWord(c.word, c.sound) + '</div><div id="zone">' + controlsHtml(c) + '</div></div>';
+  } else if (c.kind === 'heart'){
+    h += '<div class="card ' + (c.review ? 'review' : '') + '">' + (tag || '<span class="tag" style="background:#ec407a">❤️ Heart Word</span>') + heartWordHtml(c) + '<div id="zone">' + controlsHtml(c) + '</div></div>';
+  } else if (c.kind === 'spell'){
+    h += '<div class="card spell ' + (c.review ? 'review' : '') + '">' + (tag || '<span class="tag" style="background:#7c4dff">✏️ Spelling</span>') +
+      '<p class="hint" style="font-size:30px;font-weight:800">👂 Listen, then spell the word!</p>' +
+      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear it again</button></div><div id="zone">' +
+      '<input class="spellbox" id="spellin" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Type the word">' +
+      '<div class="ctrlrow"><button class="btn-green big" onclick="A.check()">Check ✔</button></div>' +
+      '<div id="feedback" class="feedback"></div>' +
+      '<div class="overrow"><button class="btn-gray small" onclick="A.override()">👍 Parent Override: mark correct</button></div></div></div>';
+  }
+  show(h);
+  if (c.kind === 'sound'){
+    var stk = newSpeech();
+    (async function(){ await wait(400); if (!alive(stk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); await wait(900); if (!alive(stk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); })();
+  }
+  if (c.kind === 'spell'){
+    var inp = $('spellin'); inp.focus();
+    inp.onkeydown = function(e){ if (e.key === 'Enter') A.check(); };
+    spellPrompt(c);
+  }
+}
+
+function spellPrompt(c){
+  var tok = newSpeech();
+  (async function(){
+    await wait(300); if (!alive(tok)) return;
+    await speak(c.word); if (!alive(tok)) return;
+    await wait(500); if (!alive(tok)) return;
+    if (!String(c.sentence||'').trim()){ await speak(c.word); return; }
+    await speak(c.sentence); if (!alive(tok)) return;
+    await wait(500); if (!alive(tok)) return;
+    await speak(c.word);
+  })();
+}
+
+function setFeedback(html){ var f = $('feedback'); if (f) f.innerHTML = html; }
+
+function markCorrect(fromOverride){
+  var c = L && L.card; if (!c || c.kind === 'banner' || c.state === 'correct') return;
+  if (fromOverride && c.state === 'wrong') c.tries = Math.max(0, c.tries - 1);   // the microphone misheard
+  c.state = 'correct'; c.correct = true; L.stars++;
+  newSpeech(); stopListening(); sfxHappy();
+  var sc = $('starcount'); if (sc) sc.textContent = L.stars;
+  var ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = '<div class="bigcheck">✔</div><div class="praise">' + PRAISE[Math.floor(Math.random()*PRAISE.length)] + ' ⭐</div>';
+  document.body.appendChild(ov);
+  var tok = L.ctok;
+  setTimeout(function(){ ov.remove(); if (L && L.ctok === tok && screen === 'lesson') nextCard(); }, 1400);
+}
+
+function markWrong(heard){
+  var c = L && L.card; if (!c || c.kind === 'banner' || c.state) return;
+  c.tries++; c.state = 'wrong';
+  stopListening(); sfxOops();
+  var last = !c.noRequeue && c.tries >= S.maxTries;
+  var lastNote = last ? '<p class="hint">💛 We\'ll practice this one again next time!</p>' : '';
+  var heardNote = heard ? '<p class="hint">I heard: <b>"' + esc(heard) + '"</b></p>' : '';
+  var override = '<div class="overrow"><button class="btn-gray small" onclick="A.override()">👍 Parent Override: mark correct</button></div>';
+  var zone = $('zone');
+  if (c.kind === 'sound'){
+    zone.innerHTML = '<p class="hint">Listen carefully, then say it with me! 👂</p>' +
+      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.hear()">🔊 Hear it again</button><button class="btn-green big" onclick="A.next()">Next ➜</button></div>';
+    var tk = newSpeech();
+    (async function(){ await wait(500); if (!alive(tk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); await wait(700); if (!alive(tk)) return; await sayOrPlay(sndKey(c.sound), c.say, {rate:0.8}); })();
+  } else if (c.kind === 'pword'){
+    c.segs = c.segs || segment(c.word, c.sound, c.tsay);
+    zone.innerHTML = heardNote + '<p class="hint">Let\'s sound it out together! 🐢</p><div class="segs">' + c.segs.map(function(s,i){
+      return (i ? '<span class="dash">-</span>' : '') + '<div class="seg' + (s.silent ? ' silent' : '') + '" id="seg' + i + '" style="background:' + SEG_COLORS[i % SEG_COLORS.length] + '">' + esc(s.t) + (s.silent ? '<small>quiet</small>' : '') + '</div>';
+    }).join('') + '</div>' + lastNote +
+      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.teach()">🔁 Show me again</button><button class="btn-green big" onclick="A.next()">Next ➜</button></div>' + override;
+    teachPhonics(c);
+  } else if (c.kind === 'heart'){
+    zone.innerHTML = heardNote + '<p class="hint" id="teachmsg">Let\'s look at this heart word! ❤️</p>' + lastNote +
+      '<div class="ctrlrow"><button class="btn-blue big" onclick="A.teach()">🔁 Show me again</button><button class="btn-green big" onclick="A.next()">Next ➜</button></div>' + override;
+    teachHeart(c);
+  } else if (c.kind === 'spell'){
+    zone.innerHTML = compareHtml(heard || '', c.word) +
+      '<p class="hint" style="font-weight:800">Now type it the right way:</p>' +
+      '<input class="spellbox" id="fixin" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Type the word correctly">' +
+      '<div class="ctrlrow" id="fixrow"><button class="btn-green big" onclick="A.fix()">Check ✔</button></div>' +
+      '<div id="feedback" class="feedback"></div>' + lastNote + override;
+    var fi = $('fixin'); fi.focus(); fi.onkeydown = function(e){ if (e.key === 'Enter') A.fix(); };
+    var tk2 = newSpeech();
+    (async function(){
+      await wait(400); if (!alive(tk2)) return;
+      await speak(c.word + ' is spelled'); if (!alive(tk2)) return;
+      var letters = c.word.toLowerCase().split('');
+      for (var i=0;i<letters.length;i++){ if (!alive(tk2)) return; if (LETTER_NAMES[letters[i]]) await speak(LETTER_NAMES[letters[i]], {rate:0.9}); }
+      if (!alive(tk2)) return; await wait(300); await speak(c.word);
+    })();
+  }
+}
+
+function segKey(s){
+  if (s.silent || s.yv) return null;
+  return sndKey(s.long ? s.g + '_e' : (s.g || s.t));
+}
+function teachPhonics(c){
+  var tok = newSpeech();
+  function hi(i){ c.segs.forEach(function(_,j){ var e = $('seg'+j); if (e) e.classList.toggle('on', i === 'all' || i === j); }); }
+  (async function(){
+    await wait(500);
+    // 1) Momma recorded this whole word? Play it.
+    var wk = wordKey(c.word);
+    if (REC[wk]){
+      if (!alive(tok)) return; hi('all');
+      await playRec(wk);
+      return;
+    }
+    // 2) Otherwise, sound by sound (Momma's sound recordings first, computer voice if missing)
+    var allMine = c.segs.every(function(s){ var k = segKey(s); return !s.say || (k && REC[k]); });
+    for (var i=0;i<c.segs.length;i++){
+      if (!alive(tok)) return; hi(i);
+      var k = segKey(c.segs[i]);
+      if (c.segs[i].say) await sayOrPlay(k, c.segs[i].say, {rate:0.6}); else await wait(600);
+      await wait(350);
+    }
+    if (!alive(tok)) return; hi(-1);
+    if (allMine) await wait(500); else await speak('Now blend it.');
+    for (var j=0;j<c.segs.length;j++){
+      if (!alive(tok)) return; hi(j);
+      if (c.segs[j].say) await sayOrPlay(segKey(c.segs[j]), c.segs[j].say, {rate:1.1, prate:1.2}); else await wait(200);
+    }
+    if (!alive(tok)) return; hi('all'); await speak(plain(c.word), {rate:0.7});
+    if (!alive(tok)) return; await wait(300); await speak(plain(c.word));
+  })();
+}
+
+function teachHeart(c){
+  var tok = newSpeech(), n = c.word.length;
+  function hi(fn){ for (var j=0;j<n;j++){ var e = $('lt'+j); if (e){ e.classList.toggle('on', fn(j) === 'on'); e.classList.toggle('glow', fn(j) === 'glow'); } } }
+  function msg(t){ var m = $('teachmsg'); if (m) m.textContent = t; }
+  (async function(){
+    await wait(500); if (!alive(tok)) return;
+    msg('Listen: "' + c.word + '"'); await speak(c.word);
+    if (!alive(tok)) return; msg('Let\'s spell it! 🔤'); await wait(300);
+    for (var i=0;i<n;i++){
+      if (!alive(tok)) return;
+      hi(function(j){ return j === i ? 'on' : ''; });
+      var ch = c.word[i].toLowerCase();
+      if (LETTER_NAMES[ch]) await speak(LETTER_NAMES[ch], {rate:0.9}); else await wait(400);
+      await wait(250);
+    }
+    if (!alive(tok)) return;
+    if (c.tricky.length){
+      var part = c.tricky.slice().sort(function(a,b){return a-b;}).map(function(i){ return c.word[i]; }).join('');
+      hi(function(j){ return c.tricky.indexOf(j) >= 0 ? 'glow' : ''; });
+      msg('❤️ The heart part is "' + part + '". We learn that part by heart!');
+      await speak('The heart part is ' + part.toLowerCase().split('').map(function(x){ return LETTER_NAMES[x] || x; }).join(', ') + '. We learn that part by heart.');
+      if (!alive(tok)) return; await wait(300);
+    }
+    hi(function(){ return ''; }); msg('Say it with me: "' + c.word + '"'); await speak(c.word);
+  })();
+}
+
+function alignWords(a, b){
+  var n = a.length, m = b.length, d = [], i, j;
+  for (i=0;i<=n;i++){ d.push([]); for (j=0;j<=m;j++) d[i].push(i===0 ? j : j===0 ? i : 0); }
+  for (i=1;i<=n;i++) for (j=1;j<=m;j++){
+    var same = a[i-1].toLowerCase() === b[j-1].toLowerCase() ? 0 : 1;
+    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+same);
+  }
+  var pairs = []; i = n; j = m;
+  while (i > 0 || j > 0){
+    if (i>0 && j>0 && d[i][j] === d[i-1][j-1] + (a[i-1].toLowerCase() === b[j-1].toLowerCase() ? 0 : 1)){ pairs.unshift([a[i-1], b[j-1]]); i--; j--; }
+    else if (i>0 && d[i][j] === d[i-1][j] + 1){ pairs.unshift([a[i-1], null]); i--; }
+    else { pairs.unshift([null, b[j-1]]); j--; }
+  }
+  return pairs;
+}
+function compareHtml(typed, correct){
+  var pairs = alignWords(typed.split(''), correct.split(''));
+  var mine = '', right = '';
+  pairs.forEach(function(p){
+    var ok = p[0] !== null && p[1] !== null && p[0].toLowerCase() === p[1].toLowerCase();
+    if (p[0] !== null) mine += '<span class="' + (ok ? '' : 'bad') + '">' + esc(p[0] === ' ' ? ' ' : p[0]) + '</span>';
+    if (p[1] !== null) right += '<span class="' + (ok ? '' : 'fix') + '">' + esc(p[1] === ' ' ? ' ' : p[1]) + '</span>';
+  });
+  return '<div class="cmp"><div class="cmprow"><div class="cmplabel">You wrote:</div><div class="cmpword">' + (mine || '<span class="bad">?</span>') + '</div></div>' +
+    '<div class="cmprow"><div class="cmplabel">Correct:</div><div class="cmpword">' + right + '</div></div></div>';
+}
+function sameSpelling(a,b){ return String(a).trim().replace(/\s+/g,' ').toLowerCase() === String(b).trim().replace(/\s+/g,' ').toLowerCase(); }
+
+function finishLesson(){
+  var k = getKid(L.kidId);
+  var scored = L.all.filter(function(c){ return c.kind !== 'banner' && c.kind !== 'sound'; });
+  var firstTry = scored.filter(function(c){ return c.correct && c.tries === 0; }).length;
+  var missed = scored.filter(function(c){ return c.tries > 0; }).map(function(c){ return c.label; });
+  var entry = { date:new Date().toISOString(), mode:L.mode, total:scored.length, firstTry:firstTry, stars:L.stars, missed:missed };
+  if (k){ k.history.push(entry); if (k.history.length > 1000) k.history = k.history.slice(-1000); k.stars += L.stars; save(); }
+  var mode = L.mode; stopAll(); L = null; screen = 'done';
+  var stars = ''; for (var i=0;i<Math.min(entry.stars, 40);i++) stars += '⭐';
+  show('<div class="card done" style="margin-top:20px"><div class="bigemoji">🎉</div><h1>Great job' + (k ? ', ' + esc(k.name) : '') + '!</h1>' +
+    '<div class="starrow">' + (stars || '💪') + '</div>' +
+    '<div class="stat">You earned ⭐ ' + entry.stars + ' star' + (entry.stars === 1 ? '' : 's') + '!</div>' +
+    '<div class="stat">Right on the first try: ' + entry.firstTry + ' out of ' + entry.total + '</div>' +
+    '<div class="missbox"><b>' + (missed.length ? '📋 Words to practice:' : '🏆 No missed words — perfect!') + '</b><br>' +
+      missed.map(function(w){ return '<span class="chip">' + esc(w) + '</span>'; }).join('') + '</div>' +
+    '<div class="ctrlrow"><button class="btn-orange big" onclick="A.start(\'' + mode + '\')">🔁 Practice Again</button>' +
+    '<button class="btn-green big" onclick="A.kid(\'' + (k ? k.id : '') + '\')">✅ All Done</button></div></div>');
+  sfxTada(); confetti();
+}
+function confetti(){
+  var bits = ['⭐','🎉','🌟','🎈','✨','💖','🟡','🟣','🔵'];
+  for (var i=0;i<45;i++){
+    var s = document.createElement('div'); s.className = 'confetti';
+    s.textContent = bits[i % bits.length];
+    s.style.left = (Math.random()*100) + 'vw';
+    s.style.animationDuration = (2.2 + Math.random()*2) + 's';
+    s.style.animationDelay = (Math.random()*0.8) + 's';
+    document.body.appendChild(s);
+    (function(el){ setTimeout(function(){ el.remove(); }, 5200); })(s);
+  }
+}
+
+/* =========================================================
+   PARENT PIN
+   ========================================================= */
+var pin = { mode:'enter', buf:'', first:'' };
+function renderPin(mode, msg, err){
+  stopAll(); L = null; screen = 'pin';
+  pin.mode = mode; pin.buf = '';
+  var title = mode === 'enter' ? '🔒 Parent Settings' : mode === 'create1' ? '🔑 Make a Parent PIN' : '🔑 Type the PIN again';
+  var sub = msg || (mode === 'enter' ? 'Type your 4-number PIN.' : mode === 'create1' ? 'Pick 4 numbers you will remember. Kids won\'t be able to open settings without it.' : 'Type the same 4 numbers one more time.');
+  var keys = ['1','2','3','4','5','6','7','8','9','del','0','ok'];
+  show('<div class="topbar"><button class="btn-gray small" onclick="A.home()">🏠 Home</button></div><div class="pinwrap panel">' +
+    '<h1>' + title + '</h1><p id="pinmsg" style="' + (err ? 'color:#c62828;font-weight:800' : '') + '">' + esc(sub) + '</p>' +
+    '<div class="dots" id="dots"></div><div class="keypad">' + keys.map(function(k){
+      if (k === 'del') return '<button onclick="A.pinKey(\'del\')" aria-label="Delete">⌫</button>';
+      if (k === 'ok') return '<button onclick="A.pinKey(\'clear\')" aria-label="Clear">✖</button>';
+      return '<button onclick="A.pinKey(\'' + k + '\')">' + k + '</button>';
+    }).join('') + '</div>' +
+    (mode === 'enter' ? '<p><button class="btn-white small" onclick="A.forgotPin()">🤔 Forgot PIN?</button></p>' : '') + '</div>');
+  drawDots(err);
+}
+function drawDots(shake){
+  var d = $('dots'); if (!d) return;
+  var h = ''; for (var i=0;i<4;i++) h += '<div class="dot' + (i < pin.buf.length ? ' full' : '') + '"></div>';
+  d.innerHTML = h;
+  if (shake){ d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); }
+}
+function pinKey(k){
+  if (screen !== 'pin') return;
+  if (k === 'del') pin.buf = pin.buf.slice(0,-1);
+  else if (k === 'clear') pin.buf = '';
+  else if (pin.buf.length < 4) pin.buf += k;
+  drawDots();
+  if (pin.buf.length === 4){
+    var b = pin.buf;
+    setTimeout(function(){
+      if (pin.mode === 'enter'){
+        if (b === S.pin){ unlocked = true; renderSettings(); }
+        else renderPin('enter', 'That PIN didn\'t match. Try again!', true);
+      } else if (pin.mode === 'create1'){ pin.first = b; renderPin('create2'); }
+      else if (pin.mode === 'create2'){
+        if (b === pin.first){ S.pin = b; save(); unlocked = true; toast('PIN saved! 🔑'); renderSettings(); }
+        else renderPin('create1', 'Those didn\'t match. Let\'s start over — pick 4 numbers.', true);
+      }
+    }, 180);
+  }
+}
+document.addEventListener('keydown', function(e){
+  if (screen !== 'pin' || document.querySelector('.modalwrap')) return;
+  if (/^\d$/.test(e.key)) pinKey(e.key);
+  else if (e.key === 'Backspace') pinKey('del');
+});
+
+/* =========================================================
+   PARENT SETTINGS
+   ========================================================= */
+function needUnlock(){ if (!unlocked){ A.settings(); return true; } return false; }
+
+function renderSettings(){
+  if (needUnlock()) return;
+  stopAll(); screen = 'settings';
+  var h = '<div class="topbar"><button class="btn-gray small" onclick="A.home()">🔒 Lock &amp; Exit</button></div><h1>⚙️ Parent Settings</h1>';
+  if (!storageOK) h += '<div class="warn">⚠️ This browser isn\'t saving changes. Please tap <b>Backup</b> and save a backup file.</div>';
+  h += '<div class="panel"><h2>👧👦 Kids</h2><p class="muted">Tap a kid to change their lists, practice modes, and lesson sizes, or to see their history.</p>' +
+    S.kids.map(function(k){
+      return '<div class="kidrow"><div class="kiddot" style="background:' + k.color + '"></div><div class="lname">' + esc(k.name) + ' <span class="muted" style="font-size:18px">⭐ ' + k.stars + '</span></div>' +
+        '<button class="btn-blue small" onclick="A.setKid(\'' + k.id + '\')">✏️ Edit</button>' +
+        '<button class="btn-teal small" onclick="A.history(\'' + k.id + '\')">📊 History</button></div>';
+    }).join('') +
+    '<p><button class="btn-green" onclick="A.addKid()">➕ Add a Kid</button></p></div>';
+  h += '<div class="setgrid"><button class="btn-purple" onclick="A.appSettings()">🎛️ Voice, Mic &amp; PIN</button>' +
+    '<button class="btn-pink" onclick="A.recs()">🎙️ My Voice Recordings</button>' +
+    '<button class="btn-orange" onclick="A.backup()">💾 Backup &amp; Move</button>' +
+    '<button class="btn-teal" onclick="A.help()">❓ How to Use</button></div>';
+  show(h);
+}
+
+function renderSetKid(id){
+  if (needUnlock()) return;
+  var k = getKid(id); if (!k) return renderSettings();
+  screen = 'setkid'; curKidId = id;
+  var h = '<div class="topbar"><button class="btn-gray small" onclick="A.settings()">⬅ Back to Settings</button></div>' +
+    '<h1 style="color:' + k.color + '">✏️ ' + esc(k.name) + '</h1>';
+  // name + color
+  h += '<div class="panel"><h2>📛 Name &amp; Color</h2><label for="kname">Name</label>' +
+    '<input id="kname" value="' + esc(k.name) + '" onchange="A.kidName(this.value)">' +
+    '<label>Button color</label><div class="row">' + KID_COLORS.map(function(c,i){
+      return '<button class="swatch' + (k.color === c ? ' sel' : '') + '" style="background:' + c + '" onclick="A.kidColor(' + i + ')" aria-label="Color ' + (i+1) + '"></button>';
+    }).join('') + '</div>' +
+    '<p style="margin-top:16px"><button class="btn-red small" onclick="A.removeKid()">🗑️ Remove ' + esc(k.name) + '</button></p></div>';
+  // modes
+  h += '<div class="panel"><h2>🎯 Practice Modes</h2><p class="muted">Tap to turn a practice ON or OFF for ' + esc(k.name) + '.</p><div class="row">' +
+    MODE_KEYS.map(function(m){
+      return '<button class="toggle' + (k.modes[m] ? ' on' : '') + '" onclick="A.toggleMode(\'' + m + '\')">' + MODES[m].icon + ' ' + MODES[m].name + ': ' + (k.modes[m] ? 'ON' : 'OFF') + '</button>';
+    }).join('') + '</div></div>';
+  // counts
+  function num(key, label, lo){
+    return '<div class="row" style="margin:8px 0"><input class="numin" type="number" min="' + lo + '" max="50" value="' + k.counts[key] + '" onchange="A.setCount(\'' + key + '\',this.value)" aria-label="' + esc(label) + '"><span>' + label + '</span></div>';
+  }
+  h += '<div class="panel"><h2>🔢 Words Per Lesson</h2>' +
+    num('phonics', 'words for each <b>New</b> phonics sound', 1) +
+    num('review', 'words in the <b>Quick Review</b> round (0 = no review)', 0) +
+    num('heart', 'heart words per lesson', 1) +
+    num('spelling', 'spelling words per lesson', 1) + '</div>';
+  // lists
+  h += listPanel(k, 'phonics', '🔤 Phonics Sounds', 'Each sound has its own word list. <b>New</b> sounds get a sound card + words. <b>Review</b> sounds show up in the Quick Review round.', '➕ Add a Sound');
+  h += listPanel(k, 'heart', '❤️ Heart Word Lists', 'Words from <b>New</b> lists are the main practice. Words from <b>Review</b> lists show up in the Quick Review round.', '➕ Add a Heart Word List');
+  h += listPanel(k, 'spelling', '✏️ Spelling Lists', 'Words from <b>New</b> lists are the main practice. Words from <b>Review</b> lists show up in the Quick Review round.', '➕ Add a Spelling List');
+  // progress
+  h += '<div class="panel"><h2>📊 Progress</h2><p>⭐ ' + k.stars + ' stars · ' + k.history.length + ' lessons done</p>' +
+    '<button class="btn-teal" onclick="A.history(\'' + k.id + '\')">📊 View History</button>' +
+    '<button class="btn-red" onclick="A.resetKid()">♻️ Reset Progress</button>' +
+    '<p class="muted" style="font-size:18px">Reset Progress clears stars and history only. Lists stay safe.</p></div>';
+  show(h);
+}
+function listPanel(k, mode, title, note, addLabel){
+  var lists = k[mode];
+  var rows = lists.map(function(l){
+    var name = mode === 'phonics' ? '<span class="snd">' + esc(l.sound || '?') + '</span>' : esc(l.name);
+    return '<div class="lrow"><div class="lname">' + name + '<span class="badge ' + l.status + '">' + (l.status === 'new' ? 'NEW' : 'REVIEW') + '</span> <span class="muted" style="font-size:17px">' + l.words.length + ' words</span></div>' +
+      '<button class="small ' + (l.status === 'new' ? 'btn-purple' : 'btn-orange') + '" onclick="A.flip(\'' + mode + '\',\'' + l.id + '\')">Make ' + (l.status === 'new' ? 'Review 🔁' : 'New ✨') + '</button>' +
+      '<button class="small btn-blue" onclick="A.editList(\'' + mode + '\',\'' + l.id + '\')">✏️ Edit</button>' +
+      '<button class="small btn-red" onclick="A.delList(\'' + mode + '\',\'' + l.id + '\')">🗑️ Delete</button></div>';
+  }).join('');
+  return '<div class="panel"><h2>' + title + '</h2><p class="muted" style="font-size:19px">' + note + '</p>' +
+    (rows || '<p><i>Nothing here yet.</i></p>') + '<p><button class="btn-green" onclick="A.addList(\'' + mode + '\')">' + addLabel + '</button></p></div>';
+}
+
+var ED = null;  // which list is being edited
+function edList(){ var k = ED && getKid(ED.kidId); return k ? getList(k, ED.mode, ED.listId) : null; }
+/* Copies the words box into the saved list. Returns true if anything was saved. */
+function syncWords(always){
+  var l = edList(), box = $('wordsbox'); if (!l || !box) return false;
+  var words = parseWords(box.value), old = {};
+  if (ED.mode === 'phonics') words = dedupe(words.map(function(w){ return w.toLowerCase(); }));
+  var cur = l.words.map(function(w){ return typeof w === 'string' ? w : w.w; });
+  if (!always && words.join('|') === cur.join('|')) return false;
+  if (ED.mode === 'phonics') l.words = words;
+  else {
+    l.words.forEach(function(w){ old[w.w.toLowerCase()] = w; });
+    l.words = words.map(function(w){
+      var o = old[w.toLowerCase()];
+      if (ED.mode === 'heart') return { w:w, t: o && o.w === w ? o.t.slice() : [] };
+      return { w:w, s: o ? o.s : '' };
+    });
+  }
+  save(); toast('Words saved! (' + l.words.length + ')');
+  return true;
+}
+function renderEditList(){
+  if (needUnlock()) return;
+  var k = getKid(ED.kidId), l = edList(); if (!k || !l) return renderSetKid(ED.kidId);
+  screen = 'editlist';
+  var mode = ED.mode, h = '<div class="topbar"><button class="btn-green small" onclick="A.doneList()">✅ Done</button></div>';
+  h += '<h1>' + MODES[mode].icon + ' ' + (mode === 'phonics' ? 'Edit Sound' : 'Edit List') + ' <span class="muted" style="font-size:24px">for ' + esc(k.name) + '</span></h1><div class="panel">';
+  if (mode === 'phonics'){
+    h += '<label for="lsound">Sound letters (example: sh)</label><input id="lsound" value="' + esc(l.sound) + '" onchange="A.setL(\'sound\',this.value)">' +
+      '<label for="lsay">How the speaker says this sound <span class="muted" style="font-weight:400">(leave empty to use "' + esc(sayFor(l.sound)) + '")</span></label>' +
+      '<div class="row"><input id="lsay" style="flex:1;width:auto" value="' + esc(l.say) + '" placeholder="' + esc(sayFor(l.sound)) + '" onchange="A.setL(\'say\',this.value)">' +
+      '<button class="btn-blue small" onclick="A.testSay()">🔊 Test</button></div>';
+  } else {
+    h += '<label for="lname">List name</label><input id="lname" value="' + esc(l.name) + '" onchange="A.setL(\'name\',this.value)">';
+  }
+  h += '<label>New or Review?</label><div class="row">' +
+    '<button class="toggle' + (l.status === 'new' ? ' on' : '') + '" onclick="A.setL(\'status\',\'new\')">✨ New</button>' +
+    '<button class="toggle' + (l.status === 'review' ? ' on' : '') + '" onclick="A.setL(\'status\',\'review\')">🔁 Review</button></div>';
+  var words = l.words.map(function(w){ return typeof w === 'string' ? w : w.w; });
+  h += '<label for="wordsbox">Words — paste them all at once! Separate with commas or put one per line.</label>' +
+    '<textarea id="wordsbox" rows="6">' + esc(words.join(', ')) + '</textarea>' +
+    '<div class="row"><button class="btn-green" onclick="A.saveWords()">💾 Save Words</button><span class="muted" style="font-size:18px">' + words.length + ' words saved</span></div>';
+  if (mode === 'phonics') h += '<p class="muted" style="font-size:18px">💡 Tip: to choose exactly how a word is broken into sound boxes, type it with dashes, like <b>d-u-ck</b> or <b>sh-ee-p</b>.</p>';
+  h += '</div>';
+  if (mode === 'phonics'){
+    h += '<div class="panel"><h2>🎙️ Record Your Voice</h2><p class="muted" style="font-size:19px">Your voice plays instead of the computer voice. Tap <b>⏺ Record</b>, talk, then tap <b>⏹ Stop</b>. It plays back so you can check it. Don\'t like it? Tap <b>Redo</b>.</p>';
+    if (l.sound) h += '<h3>The sound by itself</h3><p class="muted" style="font-size:18px">Say just the sound, like <b>"shhh"</b> — no "uh" at the end.</p>' + recRowHtml(sndKey(l.sound), 'The sound <span class="snd">' + esc(l.sound) + '</span>');
+    h += '<h3>Each word — sounded out, then blended</h3><p class="muted" style="font-size:18px">Example for <b>wish</b>: say <b>"w… i… sh… wish!"</b> This plays when your child misses the word. (Save the words above first.)</p>';
+    h += words.length ? words.map(function(w){ return recRowHtml(wordKey(w), '<span class="snd">' + esc(plain(w)) + '</span>'); }).join('') : '<p><i>Add words above first.</i></p>';
+    h += '<p class="muted" style="font-size:18px">No word recording? The app sounds it out with your <b>letter sound</b> recordings instead.</p>' +
+      '<button class="btn-teal" onclick="A.recs()">🔤 Record All Letter Sounds</button></div>';
+  }
+  if (mode === 'heart'){
+    h += '<div class="panel"><h2>❤️ Mark the Tricky Letters</h2><p class="muted">Tap the letters that are the "tricky part." A heart will show above them on the card. Tap again to remove.</p>' +
+      (l.words.length ? l.words.map(function(w, wi){
+        return '<div class="trickrow">' + w.w.split('').map(function(ch, i){
+          var on = w.t.indexOf(i) >= 0;
+          return '<button class="letterbtn' + (on ? ' on' : '') + '" onclick="A.trick(' + wi + ',' + i + ')">' + (on ? '<span class="hm">♥</span>' : '') + esc(ch) + '</button>';
+        }).join('') + '</div>';
+      }).join('') : '<p><i>Add words above first.</i></p>') + '</div>';
+  }
+  if (mode === 'spelling'){
+    h += '<div class="panel"><h2>💬 Sentences (optional)</h2><p class="muted">Type a short sentence for each word. The app says: word → sentence → word. If you leave it empty, it just says the word twice.</p>' +
+      (l.words.length ? l.words.map(function(w, wi){
+        return '<div class="sentrow"><b>' + esc(w.w) + '</b><div class="row"><input style="flex:1;width:auto" value="' + esc(w.s) + '" placeholder="Example: I can see the ' + esc(w.w) + '." onchange="A.sentence(' + wi + ',this.value)">' +
+          '<button class="btn-blue small" onclick="A.testSentence(' + wi + ')">🔊</button></div></div>';
+      }).join('') : '<p><i>Add words above first.</i></p>') + '</div>';
+  }
+  h += '<div class="row"><button class="btn-green big" onclick="A.doneList()">✅ Done</button><span class="spacer"></span><button class="btn-red small" onclick="A.delList(\'' + mode + '\',\'' + l.id + '\')">🗑️ Delete this ' + (mode === 'phonics' ? 'sound' : 'list') + '</button></div>';
+  show(h);
+}
+
+function renderHistory(id){
+  if (needUnlock()) return;
+  var k = getKid(id); if (!k) return renderSettings();
+  screen = 'history'; curKidId = id;
+  var counts = {};
+  k.history.forEach(function(e){ e.missed.forEach(function(w){ var key = MODES[e.mode].icon + ' ' + w; counts[key] = (counts[key] || 0) + 1; }); });
+  var top = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; }).slice(0, 20);
+  var h = '<div class="topbar"><button class="btn-gray small" onclick="A.settings()">⬅ Back to Settings</button><button class="btn-blue small" onclick="A.setKid(\'' + k.id + '\')">✏️ Edit ' + esc(k.name) + '</button></div>' +
+    '<h1>📊 ' + esc(k.name) + '\'s History</h1>' +
+    '<div class="panel"><h2>⭐ ' + k.stars + ' stars · ' + k.history.length + ' lessons</h2></div>' +
+    '<div class="panel"><h2>🎯 Most-Missed Words</h2>' +
+    (top.length ? top.map(function(w){ return '<span class="chip">' + esc(w) + ' <span class="muted">×' + counts[w] + '</span></span>'; }).join('') : '<p><i>No missed words yet!</i></p>') + '</div>' +
+    '<div class="panel"><h2>📅 Lessons</h2>';
+  if (!k.history.length) h += '<p><i>No lessons yet.</i></p>';
+  else {
+    h += '<div style="overflow-x:auto"><table><tr><th>Date</th><th>Practice</th><th>First try</th><th>Stars</th><th>Missed words</th></tr>' +
+      k.history.slice().reverse().map(function(e){
+        var d = new Date(e.date);
+        var ds = isNaN(d) ? esc(e.date) : d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric', year:'numeric'}) + '<br><span class="muted">' + d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) + '</span>';
+        return '<tr><td>' + ds + '</td><td>' + MODES[e.mode].icon + ' ' + MODES[e.mode].name + '</td><td>' + e.firstTry + ' / ' + e.total + '</td><td>⭐ ' + e.stars + '</td><td>' + (e.missed.length ? esc(e.missed.join(', ')) : '—') + '</td></tr>';
+      }).join('') + '</table></div>';
+  }
+  h += '</div><button class="btn-red" onclick="A.resetKid()">♻️ Reset ' + esc(k.name) + '\'s Progress</button>';
+  show(h);
+}
+
+function sayHelperText(){
+  var all = {}; Object.keys(DEFAULT_SAY).forEach(function(k){ all[k] = DEFAULT_SAY[k]; });
+  Object.keys(S.soundSay).forEach(function(k){ all[k] = S.soundSay[k]; });
+  return Object.keys(all).map(function(k){ return k + ' = ' + all[k]; }).join('\n');
+}
+function renderAppSettings(){
+  if (needUnlock()) return;
+  screen = 'appset';
+  var h = '<div class="topbar"><button class="btn-gray small" onclick="A.settings()">⬅ Back to Settings</button></div><h1>🎛️ Voice, Mic &amp; PIN</h1>';
+  h += '<div class="panel"><h2>👩 Your Name</h2><p class="muted">Used in messages like "Ask ' + pName() + ' to add your spelling words!"</p>' +
+    '<input value="' + esc(S.parentName) + '" onchange="A.setApp(\'parentName\',this.value)" aria-label="Parent name"></div>';
+  h += '<div class="panel"><h2>🗣️ Speaking Voice</h2>' +
+    (hasTTS ? '<label for="voicesel">Voice</label><select id="voicesel" onchange="A.setApp(\'voiceURI\',this.value)"></select>' +
+      '<label for="ratein">Speed: <span id="rateval">' + S.rate.toFixed(2) + '</span> <span class="muted" style="font-weight:400">(smaller = slower)</span></label>' +
+      '<input id="ratein" type="range" min="0.5" max="1.3" step="0.05" value="' + S.rate + '" oninput="document.getElementById(\'rateval\').textContent=Number(this.value).toFixed(2)" onchange="A.setApp(\'rate\',this.value)">' +
+      '<p><button class="btn-blue" onclick="A.testVoice()">🔊 Test Voice</button></p>'
+    : '<p>This browser can\'t talk. Please use Chrome or Edge.</p>') + '</div>';
+  h += '<div class="panel"><h2>🎤 Microphone Checking</h2><p class="muted">ON: kids tap 🎤 and the app listens. OFF: you tap ✔ or ✘ for each word. (Listening needs the internet.)</p>' +
+    '<button class="toggle' + (S.useMic ? ' on' : '') + '" onclick="A.setApp(\'useMic\',' + (!S.useMic) + ')">🎤 Microphone: ' + (S.useMic ? 'ON' : 'OFF') + '</button>' +
+    (SR ? '' : '<p class="warn">This browser can\'t listen for words, so you\'ll tap ✔ or ✘ instead.</p>') +
+    (micBlocked ? '<p><button class="btn-blue small" onclick="A.retryMic()">🔄 Try the microphone again</button></p>' : '') + '</div>';
+  h += '<div class="panel"><h2>🔔 Sounds &amp; Tries</h2>' +
+    '<button class="toggle' + (S.sfx ? ' on' : '') + '" onclick="A.setApp(\'sfx\',' + (!S.sfx) + ')">🔔 Happy sounds: ' + (S.sfx ? 'ON' : 'OFF') + '</button>' +
+    '<div class="row" style="margin-top:12px"><input class="numin" type="number" min="1" max="10" value="' + S.maxTries + '" onchange="A.setApp(\'maxTries\',this.value)" aria-label="Tries per word">' +
+    '<span>tries per word in one lesson (after that, the word is saved as "missed" and the lesson moves on)</span></div></div>';
+  h += '<div class="panel"><h2>🔑 Parent PIN</h2><button class="btn-purple" onclick="A.changePin()">🔑 Change PIN</button></div>';
+  h += '<div class="panel"><h2>🔤 Sound Voice Helper</h2><p class="muted" style="font-size:19px">This is how the speaker says each sound when it breaks a word into sound boxes. ' +
+    'If a sound doesn\'t sound right, change the right side. Example: <b>sh = shhh</b>. (<b>a_e</b> means "a" with a silent e, like in "cake".)</p>' +
+    '<textarea id="sayhelper" rows="10">' + esc(sayHelperText()) + '</textarea>' +
+    '<div class="row"><button class="btn-green" onclick="A.saveSayHelper()">💾 Save Sounds</button><button class="btn-gray small" onclick="A.resetSayHelper()">↩️ Reset to Original</button>' +
+    '<input id="saytest" style="flex:1;min-width:140px;width:auto" placeholder="type a sound to test, like sh"><button class="btn-blue small" onclick="A.testHelper()">🔊 Test</button></div></div>';
+  show(h);
+  fillVoices();
+}
+function fillVoices(){
+  var sel = $('voicesel'); if (!sel) return;
+  var vs = voices().filter(function(v){ return /^en/i.test(v.lang); });
+  sel.innerHTML = '<option value="">⭐ Automatic (best English voice)</option>' + vs.map(function(v){
+    return '<option value="' + esc(v.voiceURI) + '"' + (v.voiceURI === S.voiceURI ? ' selected' : '') + '>' + esc(v.name) + ' (' + esc(v.lang) + ')</option>';
+  }).join('');
+}
+
+var SOUND_EX = { a:'short a, like apple', e:'short e, like egg', i:'short i, like itch', o:'short o, like octopus', u:'short u, like up',
+  a_e:'long a, like cake', e_e:'long e, like these', i_e:'long i, like bike', o_e:'long o, like home', u_e:'long u, like cute',
+  c:'like cat', g:'like goat', s:'like sun', x:'like box', y:'like yes', igh:'like night', ea:'like eat', ow:'like cow', oo:'like moon', ew:'like new' };
+function renderRecs(){
+  if (needUnlock()) return;
+  stopAll(); screen = 'recs';
+  var extra = {};
+  S.kids.forEach(function(k){ k.phonics.forEach(function(p){ var g = String(p.sound||'').toLowerCase().trim(); if (g && !DEFAULT_SAY[g]) extra[g] = 1; }); });
+  var all = Object.keys(DEFAULT_SAY).concat(Object.keys(extra));
+  var letters = all.filter(function(g){ return g.length === 1; }).sort();
+  var silentE = all.filter(function(g){ return g.indexOf('_') >= 0; });
+  var teams = all.filter(function(g){ return g.length > 1 && g.indexOf('_') < 0; });
+  function row(g){ return recRowHtml(sndKey(g), '<span class="snd">' + esc(g) + '</span>' + (SOUND_EX[g] ? ' <span class="muted" style="font-size:17px">(' + esc(SOUND_EX[g]) + ')</span>' : '')); }
+  var words = Object.keys(REC).filter(function(k){ return k.indexOf('word:') === 0; }).sort();
+  var count = Object.keys(REC).length;
+  show('<div class="topbar"><button class="btn-gray small" onclick="A.settings()">⬅ Back to Settings</button></div><h1>🎙️ My Voice Recordings</h1>' +
+    '<div class="panel"><h2>How it works</h2><ul>' +
+    '<li>Tap <b>⏺ Record</b>, say the sound, tap <b>⏹ Stop</b>. It plays back so you can check it.</li>' +
+    '<li>Say <b>just the sound</b> — "mmm," not "muh." For stop sounds like <b>b</b> or <b>t</b>, keep it short and crisp.</li>' +
+    '<li>The app cuts off the quiet parts for you, so don\'t worry about timing.</li>' +
+    '<li>Anything you don\'t record still uses the computer voice.</li>' +
+    '<li>To record a <b>whole word</b> (sounded out + blended), go to a kid → Edit → a phonics sound.</li></ul>' +
+    '<p><b>' + count + '</b> recording' + (count === 1 ? '' : 's') + ' saved on this device.</p></div>' +
+    '<div class="panel"><h2>📦 Send Recordings to Another Computer</h2>' +
+    '<p>Recordings stay on <b>this</b> device. To put them on a Chromebook: tap <b>Save Recordings File</b> here, copy the file over (Google Drive, email, or USB), then on the Chromebook go to Parent Settings → My Voice Recordings → <b>Load Recordings File</b>.</p>' +
+    '<button class="btn-green" onclick="A.exportRecs()">💾 Save Recordings File</button>' +
+    '<input type="file" id="recfile" accept=".json,application/json" style="display:none" onchange="A.importRecs(this)">' +
+    '<button class="btn-orange" onclick="document.getElementById(\'recfile\').click()">📂 Load Recordings File</button></div>' +
+    '<div class="panel"><h2>🔤 Letter Sounds</h2>' + letters.map(row).join('') + '</div>' +
+    '<div class="panel"><h2>👯 Letter Teams</h2>' + teams.map(row).join('') + '</div>' +
+    '<div class="panel"><h2>🪄 Silent-E Vowels</h2><p class="muted" style="font-size:18px">Say the long vowel sound, like "ay" for cake.</p>' + silentE.map(row).join('') + '</div>' +
+    '<div class="panel"><h2>📖 Recorded Words</h2>' +
+    (words.length ? words.map(function(k){ return recRowHtml(k, '<span class="snd">' + esc(k.slice(5)) + '</span>'); }).join('') : '<p><i>No words recorded yet.</i></p>') + '</div>');
+}
+
+function renderBackup(){
+  if (needUnlock()) return;
+  screen = 'backup';
+  show('<div class="topbar"><button class="btn-gray small" onclick="A.settings()">⬅ Back to Settings</button></div><h1>💾 Backup &amp; Move</h1>' +
+    '<div class="panel"><h2>What is a backup?</h2><p>A backup is <b>one small file</b> that holds <b>everything</b>: all kids, all word lists, settings, stars, and history.</p>' +
+    '<ul><li>Make a backup once a week, just to be safe. 👍</li>' +
+    '<li><b>To move to another computer:</b> 1) Tap <b>Save Backup</b> here. 2) Copy the backup file (it\'s in your <b>Downloads</b> folder) and this app file to the other computer — a USB stick or email works. 3) Open the app there, go to Parent Settings → Backup &amp; Move, and tap <b>Load Backup</b>.</li>' +
+    '<li>Everything is also saved automatically in this browser — the backup is just extra safety.</li>' +
+    '<li>🎙️ Your <b>voice recordings</b> are saved separately. Use <b>My Voice Recordings → Save Recordings File</b> for those.</li></ul></div>' +
+    '<div class="panel"><h2>1️⃣ Save a Backup</h2><p>This downloads a file named like <b>practice-backup-2026-10-04.json</b> to your Downloads folder.</p>' +
+    '<button class="btn-green big" onclick="A.saveBackup()">💾 Save Backup</button></div>' +
+    '<div class="panel"><h2>2️⃣ Load a Backup</h2><p>⚠️ This <b>replaces</b> everything in the app on this computer with what\'s in the backup file.</p>' +
+    '<input type="file" id="loadfile" accept=".json,application/json" style="display:none" onchange="A.loadBackup(this)">' +
+    '<button class="btn-orange big" onclick="document.getElementById(\'loadfile\').click()">📂 Load Backup</button></div>' +
+    '<div class="panel"><h2>3️⃣ Load Lists Only</h2><p>Use this to send <b>new word lists</b> to a kid\'s computer.</p>' +
+    '<ul><li>✅ Copies: sounds, heart words, spelling lists, practice modes, and words-per-lesson.</li>' +
+    '<li>🛡️ Keeps: stars, history, PIN, voice, and sound fixes on <b>this</b> computer.</li></ul>' +
+    '<p class="muted" style="font-size:18px">How: make your list changes on your computer → Save Backup there → open that backup file here with this button.</p>' +
+    '<input type="file" id="listsfile" accept=".json,application/json" style="display:none" onchange="A.loadLists(this)">' +
+    '<button class="btn-teal big" onclick="document.getElementById(\'listsfile\').click()">📋 Load Lists Only</button></div>');
+}
+
+function renderHelp(){
+  stopAll(); screen = 'help';
+  var back = unlocked ? 'A.settings()' : 'A.home()';
+  var mom = pName();
+  show('<div class="topbar"><button class="btn-gray small" onclick="' + back + '">⬅ Back</button></div><div class="panel help"><h1>❓ How to Use</h1>' +
+    '<h2>🚀 Opening the app</h2><ul><li>Double-click the file <b>practice-app.html</b>. It opens in Chrome or Edge. Nothing to install!</li>' +
+    '<li>Tip: Drag the file to your desktop so it\'s easy to find. Keep using the <b>same computer and same browser</b> so everything is still there.</li></ul>' +
+    '<h2>👧👦 For kids</h2><ul><li>Tap your name, then pick <b>Phonics</b>, <b>Heart Words</b>, or <b>Spelling</b>.</li>' +
+    '<li>Earn a ⭐ for every word you get right!</li><li>At the end, you see your stars and the words to practice.</li></ul>' +
+    '<h2>🔤 Phonics</h2><ul><li>First comes the <b>New Sound</b> card. The app says the sound by itself. Your child repeats it, then taps <b>Next</b>. (Tap 🔊 to hear it again.)</li>' +
+    '<li>Next come word cards. The sound is colored. Your child reads the word, taps 🎤, and says it.</li>' +
+    '<li>If it\'s wrong, the app breaks the word into colored sound boxes, says each sound, blends them, and says the word. That word comes back at the end to try again.</li>' +
+    '<li>Last is the <b>Quick Review</b> (purple cards) with words from Review sounds.</li></ul>' +
+    '<h2>🎙️ Your Voice</h2><ul><li>Go to Parent Settings → <b>My Voice Recordings</b> to record each letter sound in your own voice.</li>' +
+    '<li>To record a whole word sounded out and blended (like "w… i… sh… wish"), go to a kid → <b>Edit</b> → a phonics sound → <b>Record Your Voice</b>.</li>' +
+    '<li>When a word is missed, the app plays your word recording. If there isn\'t one, it sounds it out with your letter recordings. Anything not recorded uses the computer voice.</li>' +
+    '<li>Recordings live on the device you made them on. Use <b>Save Recordings File</b> and <b>Load Recordings File</b> to copy them to a Chromebook.</li></ul>' +
+    '<h2>❤️ Heart Words</h2><ul><li>These are words that can\'t be fully sounded out. The little ♥ shows the tricky part.</li>' +
+    '<li>If it\'s wrong, the app spells it letter by letter and points out the heart part.</li></ul>' +
+    '<h2>✏️ Spelling</h2><ul><li>The app says the word, a sentence, then the word again. Tap <b>Hear it again</b> anytime.</li>' +
+    '<li>Your child types the word and taps <b>Check</b> (or presses Enter).</li><li>If it\'s wrong, the red letters show the mistakes. They type it the right way once, then it comes back at the end.</li></ul>' +
+    '<h2>🎤 The microphone</h2><ul><li>The first time, the browser asks to use the microphone. Click <b>Allow</b>.</li>' +
+    '<li>Listening needs the <b>internet</b>.</li>' +
+    '<li>If the app mishears, tap the small <b>👍 Parent Override</b> button to mark it correct.</li>' +
+    '<li>No microphone? No problem! You\'ll get big ✔ and ✘ buttons to tap instead. You can also turn the microphone off in Settings.</li></ul>' +
+    '<h2>⚙️ Parent Settings (the gear on the home screen)</h2><ul><li>The first time, you make a 4-number PIN. Forgot it? Tap <b>Forgot PIN?</b> — it only removes the PIN. Your lists stay safe.</li>' +
+    '<li><b>Edit</b> a kid to: change their name, turn practices on/off, set how many words per lesson, and add/edit/delete lists.</li>' +
+    '<li><b>Adding words:</b> paste them all at once, with commas or one per line, then tap <b>Save Words</b>.</li>' +
+    '<li><b>New vs Review:</b> one tap on <b>Make Review</b> or <b>Make New</b> moves a sound or list.</li>' +
+    '<li><b>Heart words:</b> tap letters to mark the tricky part with a ♥.</li>' +
+    '<li><b>Spelling:</b> type a sentence for each word (optional).</li>' +
+    '<li><b>History</b> shows dates, scores, and the most-missed words.</li>' +
+    '<li><b>Voice, Mic &amp; PIN:</b> pick a voice, change the speed, turn the mic on/off, change your PIN, and fix how sounds are said.</li></ul>' +
+    '<h2>💾 Backups</h2><ul><li>Everything saves by itself. But clearing your browser history can erase it, so tap <b>Save Backup</b> once a week.</li>' +
+    '<li>To move everything to another computer, use <b>Save Backup</b> here and <b>Load Backup</b> there.</li>' +
+    '<li>To send <b>just new lists</b> to a kid\'s computer (and keep their stars), use <b>Save Backup</b> here and <b>Load Lists Only</b> there.</li></ul>' +
+    '<p style="font-size:26px;text-align:center">You\'ve got this, ' + mom + '! 💖</p></div>');
+}
+
+/* =========================================================
+   BUTTON ACTIONS
+   ========================================================= */
+var A = window.A = {
+  home: function(){ renderHome(); },
+  kid: function(id){ renderKid(id); },
+  start: function(mode){ startLesson(mode); },
+  help: function(){ renderHelp(); },
+  next: function(){ if (L && L.card && (L.card.kind === 'banner' || L.card.kind === 'sound' || L.card.state === 'wrong')) nextCard(); },
+  quit: function(){
+    confirmBox('Stop this lesson?', 'Stars from this lesson won\'t be saved.', 'Yes, stop', 'btn-red').then(function(ok){ if (ok) renderKid(L ? L.kidId : curKidId); });
+  },
+  hear: function(){
+    var c = L && L.card; if (!c) return;
+    if (c.kind === 'spell'){ spellPrompt(c); return; }
+    newSpeech();
+    if (c.kind === 'sound') sayOrPlay(sndKey(c.sound), c.say, {rate:0.8});
+    else speak(plain(c.word), {rate:0.85});
+  },
+  teach: function(){ var c = L && L.card; if (!c || c.state !== 'wrong') return; if (c.kind === 'pword') teachPhonics(c); else if (c.kind === 'heart') teachHeart(c); },
+  right: function(){ markCorrect(false); },
+  wrong: function(){ markWrong(''); },
+  override: function(){ markCorrect(true); },
+  mic: function(){
+    var c = L && L.card; if (!c || c.state || activeRec) return;
+    var btn = $('micbtn'); if (!btn) return;
+    newSpeech();
+    btn.classList.add('listening'); btn.textContent = '👂 Listening…';
+    setFeedback('<span class="muted">Say the word now!</span>');
+    var tok = L.ctok;
+    listen().then(function(res){
+      if (!L || L.ctok !== tok || L.card !== c || c.state) return;
+      var b = $('micbtn'); if (b){ b.classList.remove('listening'); b.textContent = '🎤 Say it'; }
+      if (res.results.length){
+        if (isMatch(c.word, res.results)) markCorrect(false);
+        else markWrong(res.results[0]);
+        return;
+      }
+      var e = res.error;
+      if (e === 'not-allowed' || e === 'service-not-allowed'){ micBlocked = 'blocked'; renderLesson(); toast('The microphone isn\'t allowed. Use ✔ / ✘ instead.'); }
+      else if (e === 'network'){ micBlocked = 'network'; renderLesson(); toast('Listening needs the internet. Use ✔ / ✘ instead.'); }
+      else if (e === 'audio-capture'){ micBlocked = 'nomic'; renderLesson(); toast('No microphone found. Use ✔ / ✘ instead.'); }
+      else setFeedback('🙉 I didn\'t hear anything. Tap 🎤 and try again!');
+    });
+  },
+  check: function(){
+    var c = L && L.card; if (!c || c.kind !== 'spell' || c.state) return;
+    var v = ($('spellin') || {}).value || '';
+    if (!v.trim()){ setFeedback('✏️ Type the word first!'); return; }
+    if (sameSpelling(v, c.word)) markCorrect(false); else markWrong(v.trim());
+  },
+  fix: function(){
+    var c = L && L.card; if (!c || c.state !== 'wrong') return;
+    var inp = $('fixin'); var v = inp ? inp.value : '';
+    if (sameSpelling(v, c.word)){
+      sfxHappy(); setFeedback('👍 Yes! That\'s right!');
+      inp.disabled = true;
+      $('fixrow').innerHTML = '<button class="btn-green big" onclick="A.next()" id="nextbtn">Next ➜</button>';
+      $('nextbtn').focus();
+    } else { setFeedback('Not quite — look at the green letters and try again! 💪'); inp.select(); }
+  },
+
+  /* parent area */
+  settings: function(){
+    stopAll(); L = null;
+    if (unlocked) return renderSettings();
+    if (!S.pin) renderPin('create1'); else renderPin('enter');
+  },
+  pinKey: pinKey,
+  forgotPin: function(){
+    confirmBox('Reset the PIN?', 'This <b>only removes the PIN</b>. All kids, lists, stars, and history stay safe. Then you can make a new PIN.', 'Reset PIN', 'btn-orange').then(function(ok){
+      if (ok){ S.pin = null; save(); renderPin('create1', 'PIN cleared. Pick 4 new numbers.'); }
+    });
+  },
+  changePin: function(){ if (needUnlock()) return; renderPin('create1', 'Pick 4 new numbers for your PIN.'); },
+  setKid: function(id){ renderSetKid(id); },
+  recs: function(){ if (screen === 'editlist') syncWords(); renderRecs(); },
+  rec: function(k){
+    var key = decodeURIComponent(k);
+    if (RA){ stopRec(); return; }   // tapping any button while recording just stops it
+    startRec(key);
+  },
+  playRec: function(k){ stopSpeak(); playRec(decodeURIComponent(k)); },
+  delRec: function(k){
+    var key = decodeURIComponent(k);
+    confirmBox('Delete this recording?', 'The computer voice will be used instead.', 'Yes, delete', 'btn-red').then(function(ok){
+      if (!ok) return;
+      recDel(key).then(function(){ toast('Deleted.'); if (screen === 'recs' && key.indexOf('word:') === 0) renderRecs(); else updateRecRow(key); })
+        .catch(function(){ toast('Could not delete.'); });
+    });
+  },
+  exportRecs: function(){
+    recAll().then(function(items){
+      if (!items.length){ alertBox('Nothing to save yet', 'Record some sounds first!'); return; }
+      return Promise.all(items.map(function(it){
+        return new Promise(function(res){ var fr = new FileReader(); fr.onload = function(){ res({ key:it.key, data:fr.result }); }; fr.onerror = function(){ res(null); }; fr.readAsDataURL(it.blob); });
+      })).then(function(list){
+        list = list.filter(Boolean);
+        var d = new Date(), ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        var blob = new Blob([JSON.stringify({ app:'momma-practice-app', type:'recordings', version:1, savedAt:d.toISOString(), items:list })], { type:'application/json' });
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'practice-voice-recordings-' + ds + '.json';
+        document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+        alertBox('Recordings saved! 🎙️', list.length + ' recordings are in your <b>Downloads</b> folder in <b>' + esc(a.download) + '</b>.');
+      });
+    }).catch(function(){ alertBox('Oops', 'The recordings could not be saved.'); });
+  },
+  importRecs: function(input){
+    var f = input.files && input.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      input.value = '';
+      var obj = null; try { obj = JSON.parse(r.result); } catch(e){}
+      var items = obj && obj.type === 'recordings' && Array.isArray(obj.items) ? obj.items.filter(function(it){
+        return it && typeof it.key === 'string' && /^(snd|word):/.test(it.key) && typeof it.data === 'string' && /^data:audio\//.test(it.data);
+      }) : [];
+      if (!items.length){ alertBox('Hmm, that didn\'t work', 'That isn\'t a recordings file. Pick a file named like <b>practice-voice-recordings-….json</b>.'); return; }
+      confirmBox('Load ' + items.length + ' recordings?', 'Recordings with the same sound or word will be replaced. Others stay.', 'Yes, load', 'btn-orange').then(function(ok){
+        if (!ok) return;
+        var n = 0;
+        items.reduce(function(p, it){
+          return p.then(function(){ return fetch(it.data).then(function(x){ return x.blob(); }).then(function(b){ return recPut(it.key, b); }).then(function(){ n++; }).catch(function(){}); });
+        }, Promise.resolve()).then(function(){ alertBox('Recordings loaded! 🎉', n + ' recordings are ready on this device.'); renderRecs(); });
+      });
+    };
+    r.onerror = function(){ alertBox('Oops', 'That file could not be read.'); };
+    r.readAsText(f);
+  },
+  history: function(id){ renderHistory(id); },
+  appSettings: function(){ renderAppSettings(); },
+  backup: function(){ renderBackup(); },
+  addKid: function(){
+    promptBox('Add a Kid', 'What is their name?', '').then(function(name){
+      if (name == null) return; name = name.trim(); if (!name){ toast('Please type a name.'); return; }
+      var k = newKid(name, KID_COLORS[S.kids.length % KID_COLORS.length]); S.kids.push(k); save(); toast(name + ' added! 🎉'); renderSetKid(k.id);
+    });
+  },
+  kidName: function(v){ var k = getKid(curKidId); v = String(v).trim(); if (!k) return; if (!v){ toast('Name can\'t be empty.'); var n = $('kname'); if (n) n.value = k.name; return; } k.name = v; save(); toast('Name saved!'); },
+  kidColor: function(i){ var k = getKid(curKidId); if (!k) return; k.color = KID_COLORS[i]; save(); renderSetKid(k.id); },
+  removeKid: function(){
+    var k = getKid(curKidId); if (!k) return;
+    confirmBox('Remove ' + k.name + '?', 'This deletes <b>' + esc(k.name) + '</b> and all their lists, stars, and history. (Tip: Save a Backup first if you\'re not sure.)', 'Yes, remove', 'btn-red').then(function(ok){
+      if (!ok) return; S.kids = S.kids.filter(function(x){ return x.id !== k.id; }); save(); toast('Removed.'); renderSettings();
+    });
+  },
+  toggleMode: function(m){ var k = getKid(curKidId); if (!k) return; k.modes[m] = !k.modes[m]; save(); renderSetKid(k.id); },
+  setCount: function(key, v){ var k = getKid(curKidId); if (!k) return; k.counts[key] = Math.round(clamp(v, key === 'review' ? 0 : 1, 50)); save(); toast('Saved!'); },
+  resetKid: function(){
+    var k = getKid(curKidId); if (!k) return;
+    confirmBox('Reset ' + k.name + '\'s progress?', 'This clears <b>stars and history</b> for ' + esc(k.name) + '. Word lists stay safe.', 'Yes, reset', 'btn-red').then(function(ok){
+      if (!ok) return; k.stars = 0; k.history = []; save(); toast('Progress reset.'); if (screen === 'history') renderHistory(k.id); else renderSetKid(k.id);
+    });
+  },
+  flip: function(mode, id){ var k = getKid(curKidId), l = k && getList(k, mode, id); if (!l) return; l.status = l.status === 'new' ? 'review' : 'new'; save(); renderSetKid(k.id); },
+  addList: function(mode){
+    var k = getKid(curKidId); if (!k) return;
+    var l = mode === 'phonics' ? { id:uid(), sound:'', say:'', status:'new', words:[] } : { id:uid(), name:'New List', status:'new', words:[] };
+    k[mode].push(l); save();
+    ED = { kidId:k.id, mode:mode, listId:l.id, fresh:true }; renderEditList();
+    var f = $(mode === 'phonics' ? 'lsound' : 'lname'); if (f){ f.focus(); f.select(); }
+  },
+  editList: function(mode, id){ ED = { kidId:curKidId, mode:mode, listId:id }; renderEditList(); },
+  delList: function(mode, id){
+    var k = getKid(curKidId), l = k && getList(k, mode, id); if (!l) return;
+    var nm = mode === 'phonics' ? 'the "' + esc(l.sound || '?') + '" sound' : 'the list "' + esc(l.name) + '"';
+    confirmBox('Delete?', 'Delete ' + nm + ' and its ' + l.words.length + ' words?', 'Yes, delete', 'btn-red').then(function(ok){
+      if (!ok) return; k[mode] = k[mode].filter(function(x){ return x.id !== id; }); save(); toast('Deleted.'); renderSetKid(k.id);
+    });
+  },
+  setL: function(field, v){
+    var l = edList(); if (!l) return;
+    if (field === 'sound') v = String(v).trim().toLowerCase();
+    else if (field === 'name') v = String(v).trim() || 'My List';
+    else if (field === 'say') v = String(v).trim();
+    if (field === 'status') syncWords();
+    l[field] = v; save(); toast('Saved!');
+    if (field === 'status') renderEditList();
+    else if (field === 'sound'){ var sy = $('lsay'); if (sy) sy.placeholder = sayFor(v); }
+  },
+  saveWords: function(){ if (syncWords(true)) renderEditList(); },
+  sentence: function(wi, v){ var l = edList(); if (!l || !l.words[wi]) return; l.words[wi].s = String(v).trim(); save(); toast('Sentence saved!'); },
+  trick: function(wi, i){
+    syncWords();
+    var l = edList(); if (!l || !l.words[wi]) return;
+    var t = l.words[wi].t, at = t.indexOf(i);
+    if (at >= 0) t.splice(at, 1); else t.push(i);
+    t.sort(function(a,b){return a-b;}); save(); renderEditList();
+  },
+  testSentence: function(wi){
+    var l = edList(); if (!l || !l.words[wi]) return; var w = l.words[wi];
+    stopSpeak(); speak(w.w).then(function(){ return w.s ? speak(w.s) : null; }).then(function(){ return speak(w.w); });
+  },
+  testSay: function(){ var l = edList(); if (!l) return; var box = $('lsay'); var v = box ? box.value.trim() : l.say; stopSpeak(); speak(v || sayFor(l.sound), {rate:0.8}); },
+  doneList: function(){
+    syncWords();
+    var k = getKid(ED.kidId), l = edList();
+    if (k && l && ED.mode === 'phonics' && !l.sound && !l.words.length) k.phonics = k.phonics.filter(function(x){ return x.id !== l.id; });
+    save(); renderSetKid(ED.kidId);
+  },
+  setApp: function(key, v){
+    if (key === 'rate') v = clamp(v, 0.4, 1.5);
+    if (key === 'maxTries') v = Math.round(clamp(v, 1, 10));
+    if (key === 'parentName'){ v = String(v).trim() || 'Momma'; }
+    if (key === 'useMic' && v) micBlocked = '';
+    S[key] = v; save(); toast('Saved!');
+    if (key === 'useMic' || key === 'sfx') renderAppSettings();
+  },
+  retryMic: function(){ micBlocked = ''; toast('OK! The microphone will be tried again.'); renderAppSettings(); },
+  testVoice: function(){ stopSpeak(); speak('Hi! Let\'s practice. Great job!'); },
+  saveSayHelper: function(){
+    var box = $('sayhelper'); if (!box) return;
+    var out = {};
+    box.value.split(/\n/).forEach(function(line){
+      var m = line.split('='); if (m.length < 2) return;
+      var k = m[0].trim().toLowerCase(), v = m.slice(1).join('=').trim();
+      if (k && v && DEFAULT_SAY[k] !== v) out[k] = v;
+    });
+    S.soundSay = out; save(); toast('Sounds saved!'); renderAppSettings();
+  },
+  resetSayHelper: function(){
+    confirmBox('Reset sounds?', 'Put all sounds back to the original way?', 'Reset', 'btn-orange').then(function(ok){ if (ok){ S.soundSay = {}; save(); renderAppSettings(); } });
+  },
+  testHelper: function(){
+    var v = String(($('saytest') || {}).value || '').trim().toLowerCase(); if (!v) return;
+    var box = $('sayhelper'), said = null;
+    if (box){
+      box.value.split(/\n/).forEach(function(line){
+        var m = line.split('='); if (m.length < 2) return;
+        if (m[0].trim().toLowerCase() === v){ var val = m.slice(1).join('=').trim(); if (val) said = val; }
+      });
+    }
+    stopSpeak(); speak(said || sayFor(v), {rate:0.8});
+    if (said && said !== sayFor(v)) toast('Testing your new sound — tap Save Sounds to keep it!');
+  },
+  saveBackup: function(){
+    try {
+      var data = JSON.stringify({ app:'momma-practice-app', type:'backup', version:1, savedAt:new Date().toISOString(), data:S }, null, 2);
+      var blob = new Blob([data], { type:'application/json' });
+      var a = document.createElement('a'), d = new Date();
+      var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      a.href = URL.createObjectURL(blob); a.download = 'practice-backup-' + ds + '.json';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+      alertBox('Backup saved! 💾', 'Look in your <b>Downloads</b> folder for <b>' + esc(a.download) + '</b>. Keep it somewhere safe, like a USB stick or your email.');
+    } catch(e){ alertBox('Oops', 'The backup could not be saved on this browser.'); }
+  },
+  loadLists: function(input){
+    var f = input.files && input.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var obj = null, norm = null;
+      try { obj = JSON.parse(r.result); norm = normalize(obj && obj.data ? obj.data : obj); } catch(e){}
+      input.value = '';
+      if (!norm){ alertBox('Hmm, that didn\'t work', 'That file isn\'t a backup from this app. Please pick a file named like <b>practice-backup-….json</b>.'); return; }
+      var when = obj && obj.savedAt ? new Date(obj.savedAt).toLocaleString() : 'an unknown date';
+      confirmBox('Load lists only?', 'Lists from <b>' + esc(when) + '</b> for: ' + esc(norm.kids.map(function(k){ return k.name; }).join(', ')) +
+        '.<br><br>This <b>replaces the word lists</b> on this computer. <b>Stars and history stay safe.</b>', 'Yes, load lists', 'btn-teal').then(function(ok){
+        if (!ok) return;
+        var updated = [], added = [];
+        norm.kids.forEach(function(nk){
+          var match = getKid(nk.id);
+          if (!match){ for (var i=0;i<S.kids.length;i++) if (S.kids[i].name.trim().toLowerCase() === nk.name.trim().toLowerCase()){ match = S.kids[i]; break; } }
+          if (match){
+            match.phonics = nk.phonics; match.heart = nk.heart; match.spelling = nk.spelling;
+            match.modes = nk.modes; match.counts = nk.counts;
+            updated.push(match.name);
+          } else {
+            nk.stars = 0; nk.history = []; if (getKid(nk.id)) nk.id = uid();
+            S.kids.push(nk); added.push(nk.name);
+          }
+        });
+        save();
+        alertBox('Lists loaded! 🎉', (updated.length ? 'Updated: <b>' + esc(updated.join(', ')) + '</b>. ' : '') +
+          (added.length ? 'Added new: <b>' + esc(added.join(', ')) + '</b>. ' : '') + 'Stars and history were kept.');
+        renderSettings();
+      });
+    };
+    r.onerror = function(){ alertBox('Oops', 'That file could not be read.'); };
+    r.readAsText(f);
+  },
+  loadBackup: function(input){
+    var f = input.files && input.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var obj = null, norm = null;
+      try { obj = JSON.parse(r.result); norm = normalize(obj && obj.data ? obj.data : obj); } catch(e){}
+      input.value = '';
+      if (!norm){ alertBox('Hmm, that didn\'t work', 'That file isn\'t a backup from this app. Please pick a file named like <b>practice-backup-….json</b>.'); return; }
+      var when = obj && obj.savedAt ? new Date(obj.savedAt).toLocaleString() : 'an unknown date';
+      confirmBox('Load this backup?', 'Backup from <b>' + esc(when) + '</b> with ' + norm.kids.length + ' kid(s): ' + esc(norm.kids.map(function(k){ return k.name; }).join(', ')) +
+        '.<br><br>This <b>replaces</b> everything in the app on this computer.', 'Yes, load it', 'btn-orange').then(function(ok){
+        if (!ok) return; S = norm; save(); toast('Backup loaded! 🎉'); renderSettings();
+      });
+    };
+    r.onerror = function(){ alertBox('Oops', 'That file could not be read.'); };
+    r.readAsText(f);
+  }
+};
+
+renderHome();
+})();
+</script>
+</body>
+</html>
